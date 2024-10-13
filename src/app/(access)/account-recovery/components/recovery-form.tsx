@@ -19,16 +19,16 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-const loginSchema = z.object({
+const recoverySchema = z.object({
   email: z
     .string({ required_error: 'Campo obrigatório' })
     .email('Informe um email válido'),
   password: z.string({ required_error: 'Campo obrigatório' }),
 })
 
-export const LoginForm: NextComponentType = () => {
+export const RecoveryForm: NextComponentType = () => {
   const form = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(recoverySchema),
   })
 
   const onSubmit = () => {
@@ -37,7 +37,10 @@ export const LoginForm: NextComponentType = () => {
 
   return (
     <Form {...form}>
-      <form className="mx-auto max-w-md" onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        className="mx-auto max-w-md sm:max-w-full"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
         <CardContent className="space-y-8">
           <FormField
             control={form.control}
@@ -52,28 +55,14 @@ export const LoginForm: NextComponentType = () => {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem className="mb-6">
-                <FormLabel>Senha</FormLabel>
-                <FormControl>
-                  <Input placeholder="Insira sua senha" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Link href="/account-recovery" className="mt-4 inline-block text-sm">
-            Esqueci minha senha
-          </Link>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex-col items-start justify-start gap-y-8">
           <Button type="submit" className="w-full">
             Entrar
           </Button>
+          <Link href="/login" className="mt-4 inline-block text-sm">
+            Voltar ao login
+          </Link>
         </CardFooter>
       </form>
     </Form>
