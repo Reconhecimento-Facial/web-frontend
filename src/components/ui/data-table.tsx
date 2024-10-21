@@ -133,6 +133,7 @@ export function DataTable<TData, TValue>({
                     <TableCell
                       key={cell.id}
                       align={cell.column.columnDef.meta?.style.align}
+                      className="text-xs"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -223,7 +224,7 @@ export function DataTablePagination<TData>({
         {table.getFilteredRowModel().rows.length} linha(s) selecionadas
       </div>
 
-      <div className="flex items-center justify-between px-2">
+      <div className="flex flex-col flex-wrap items-center justify-center space-y-4 px-2 md:flex-row md:justify-between">
         <div className="flex items-center space-x-2">
           <p className="text-sm font-medium">Itens por página</p>
           <Select

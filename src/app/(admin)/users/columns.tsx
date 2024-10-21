@@ -14,7 +14,7 @@ import {
 
 import { UserStatus } from './utils'
 import { Badge } from '@/components/ui/badge'
-import { FilterOption } from '@/components/ui/data-table-faceted-filter'
+import { FilterOption } from '@/components/ui/data-table-filter'
 
 export type User = {
   id: string

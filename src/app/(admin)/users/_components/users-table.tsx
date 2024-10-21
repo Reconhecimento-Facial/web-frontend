@@ -100,11 +100,12 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
   const groupsColumn = table.getColumn('groups')
 
   return (
-    <div className="mb-6 flex items-stretch justify-stretch gap-4">
+    <div className="mb-6 flex flex-wrap items-stretch justify-stretch gap-4">
       <Input
         className="max-w-sm"
         defaultValue={`${nameColumn?.getFilterValue() || ''}`}
         onChange={handleSearch}
+        placeholder="Buscar usuário"
       />
       {statusColumn && (
         <DataTableFilter
