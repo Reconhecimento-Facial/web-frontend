@@ -1,17 +1,17 @@
 'use client'
 
 import { DataTable } from '@/components/ui/data-table'
-import { columns, User } from './columns'
+import { columns, User } from '../columns'
 
 import { usePagination } from '@/hooks/usePagination'
 import { ChangeEvent, ComponentType } from 'react'
-import { useFilter, useSorting } from './searchParams'
+import { useFilter, useSorting } from '../searchParams'
 import { Input } from '@/components/ui/input'
 
 import { useDebouncedCallback } from 'use-debounce'
 
 import { Table } from '@tanstack/react-table'
-import { groupOptions, statusOptions } from './utils'
+import { groupOptions, statusOptions } from '../utils'
 import { DataTableFilter } from '@/components/ui/data-table-filter'
 
 type UsersTableProps = {

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { User } from './columns'
-import { FilterOption } from '@/components/ui/data-table-faceted-filter'
+import { FilterOption } from '@/components/ui/data-table-filter'
 
 export type UserStatus = {
   value: 'active' | 'deactive'

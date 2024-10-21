@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import { LoginForm } from './components/login-form'
+import { LoginForm } from './_components/login-form'
 import { CardHeader, CardTitle } from '@/components/ui/card'
 
 const LoginPage: NextPage = () => {

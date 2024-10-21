@@ -1,6 +1,6 @@
 import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { NextPage } from 'next'
-import { RecoveryForm } from './components/recovery-form'
+import { RecoveryForm } from './_components/recovery-form'
 
 const AccountRecoveryPage: NextPage = () => {
   return (
