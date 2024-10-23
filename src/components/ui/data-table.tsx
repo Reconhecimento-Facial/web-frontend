@@ -94,7 +94,7 @@ export function DataTable<TData, TValue>({
     <div>
       <Toolbar table={table} />
       <DataTableHeadInfo table={table} />
-      <div className="mt-6 rounded-md border bg-white">
+      <div className="mt-4 rounded-md border bg-background">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -204,7 +204,7 @@ export function DataTableHeadInfo<TData>({
   const end = pageSize * pageIndex + pageSize
 
   return (
-    <div className="text-sm text-muted-foreground">
+    <div className="text-xs text-muted-foreground">
       Mostrando {start} - {end} de {table.getRowCount()}
     </div>
   )
@@ -218,7 +218,7 @@ export function DataTablePagination<TData>({
   table,
 }: DataTablePaginationProps<TData>) {
   return (
-    <div className="mt-6 space-y-6">
+    <div className="mt-4 space-y-4">
       <div className="flex-1 text-sm text-muted-foreground">
         {table.getFilteredSelectedRowModel().rows.length} de{' '}
         {table.getFilteredRowModel().rows.length} linha(s) selecionadas
