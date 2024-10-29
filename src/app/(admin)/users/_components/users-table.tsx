@@ -13,6 +13,7 @@ import { useDebouncedCallback } from 'use-debounce'
 import { Table } from '@tanstack/react-table'
 import { groupOptions, statusOptions } from '../utils'
 import { DataTableFilter } from '@/components/ui/data-table-filter'
+import { Button } from '@/components/ui/button'
 
 type UsersTableProps = {
   users: User[]
@@ -100,27 +101,32 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
   const groupsColumn = table.getColumn('groups')
 
   return (
-    <div className="mb-6 flex flex-wrap items-stretch justify-stretch gap-4">
-      <Input
-        className="max-w-sm"
-        defaultValue={`${nameColumn?.getFilterValue() || ''}`}
-        onChange={handleSearch}
-        placeholder="Buscar usuário"
-      />
-      {statusColumn && (
-        <DataTableFilter
-          column={statusColumn}
-          title="Status"
-          options={statusOptions}
+    <div className="mb-6 flex flex-wrap items-stretch justify-between gap-4">
+      <div className="flex flex-wrap items-stretch gap-4 md:min-w-[700px]">
+        <Input
+          className="max-w-sm"
+          defaultValue={`${nameColumn?.getFilterValue() || ''}`}
+          onChange={handleSearch}
+          placeholder="Buscar usuário"
         />
-      )}
-      {groupsColumn && (
-        <DataTableFilter
-          column={groupsColumn}
-          title="Grupos"
-          options={groupOptions}
-        />
-      )}
+        {statusColumn && (
+          <DataTableFilter
+            column={statusColumn}
+            title="Status"
+            options={statusOptions}
+          />
+        )}
+        {groupsColumn && (
+          <DataTableFilter
+            column={groupsColumn}
+            title="Grupos"
+            options={groupOptions}
+          />
+        )}
+      </div>
+      <div>
+        <Button>Adicionar Usuário</Button>
+      </div>
     </div>
   )
 }

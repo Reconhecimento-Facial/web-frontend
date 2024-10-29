@@ -1,3 +1,3 @@
 export default function TestPage() {
-  return <div>teste</div>
+  return <div>Não implementado</div>
 }

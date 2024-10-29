@@ -15,13 +15,17 @@ import {
 import { UserStatus } from './utils'
 import { Badge } from '@/components/ui/badge'
 import { FilterOption } from '@/components/ui/data-table-filter'
+import { useRouter } from 'next/navigation'
 
 export type User = {
   id: string
   name: string
   email: string
+  cpf: string
+  birth_date: Date
   status: UserStatus
   groups: FilterOption[]
+  photo_uploaded_at: Date | null
   last_access: {
     environment: FilterOption
     access_at: Date
@@ -91,7 +95,8 @@ export const columns: ColumnDef<User>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      const payment = row.original
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { push } = useRouter()
 
       return (
         <DropdownMenu>
@@ -102,9 +107,7 @@ export const columns: ColumnDef<User>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
+            <DropdownMenuItem onClick={() => push(`/users/${row.original.id}`)}>
               Ver Perfil
             </DropdownMenuItem>
 
