@@ -1,7 +1,7 @@
 import { SquareArrowOutUpRight, User, UserX } from 'lucide-react'
 import { faker } from '@faker-js/faker'
 
-import { environmentOptions, fakeUsers } from '../utils'
+import { environmentOptions, fakeUsers } from '@/lib/data'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -86,7 +86,7 @@ export default function UserProfilePage({
                   {user.last_access.environment.label}
                 </span>
                 {user.last_access.access_at.toLocaleDateString('pt-BR', {
-                  dateStyle: 'long',
+                  
                 })}
               </p>
             </div>

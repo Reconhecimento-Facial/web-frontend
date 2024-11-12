@@ -1,31 +1,29 @@
 'use client'
 
 import { ChangeEvent, ComponentType } from 'react'
+import { columns, Environment } from '../columns'
+import { useSorting } from '@/hooks/use-sorting'
+import { usePagination } from '@/hooks/use-pagination'
+import { useFilter } from '@/hooks/use-filters'
+import { DataTable } from '@/components/ui/data-table'
+import { Input } from '@/components/ui/input'
 import { useDebouncedCallback } from 'use-debounce'
 import { Table } from '@tanstack/react-table'
-
-import { columns, User } from '../columns'
-
-import { usePagination } from '@/hooks/use-pagination'
-import { groupOptions, statusOptions } from '@/lib/data'
-
-import { Input } from '@/components/ui/input'
-import { DataTable } from '@/components/ui/data-table'
 import { DataTableFilter } from '@/components/ui/data-table-filter'
+import { groupOptions } from '@/lib/data'
 import { Button } from '@/components/ui/button'
 
-import { useSorting } from '@/hooks/use-sorting'
-import { useFilter } from '@/hooks/use-filters'
-
-type UsersTableProps = {
-  users: User[]
+type EnvironmentsTableProps = {
+  environments: Environment[]
   totalCount: number
 }
 
-export const UsersTable: ComponentType<UsersTableProps> = ({
-  users,
+export const EnvironmentsTable: ComponentType<EnvironmentsTableProps> = ({
+  environments,
   totalCount,
 }) => {
+
+
   const [sorting, setSorting] = useSorting()
   const [pagination, setPagination] = usePagination()
   const [filters, setFilters] = useFilter()
@@ -34,7 +32,7 @@ export const UsersTable: ComponentType<UsersTableProps> = ({
     <div>
       <DataTable
         columns={columns}
-        data={users}
+        data={environments}
         getRowId={(originalRow) => originalRow.id}
         pagination
         Toolbar={DataTableToolbar}
@@ -86,7 +84,7 @@ export const UsersTable: ComponentType<UsersTableProps> = ({
 }
 
 interface DataTableToolbarProps {
-  table: Table<User>
+  table: Table<Environment>
 }
 
 function DataTableToolbar({ table }: DataTableToolbarProps) {
@@ -99,7 +97,6 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
     500,
   )
 
-  const statusColumn = table.getColumn('status')
   const groupsColumn = table.getColumn('groups')
 
   return (
@@ -111,13 +108,7 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
           onChange={handleSearch}
           placeholder="Buscar usuário"
         />
-        {statusColumn && (
-          <DataTableFilter
-            column={statusColumn}
-            title="Status"
-            options={statusOptions}
-          />
-        )}
+
         {groupsColumn && (
           <DataTableFilter
             column={groupsColumn}

@@ -1,7 +1,7 @@
 import { NextPage } from 'next'
 
 import { UsersTable } from './_components/users-table'
-import { fakeUsers } from './utils'
+import { fakeUsers } from '@/lib/data'
 
 import { searchParamsCache } from './searchParams'
 import { User } from './columns'

@@ -22,7 +22,7 @@ const items = [
   },
   {
     title: 'Ambientes',
-    url: '#',
+    url: '/environments',
     icon: DoorClosed,
   },
   {

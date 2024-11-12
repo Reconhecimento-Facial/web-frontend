@@ -1,5 +1,4 @@
 'use client'
-
 import { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
 
@@ -12,52 +11,27 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import { UserStatus } from '@/lib/data'
-import { Badge } from '@/components/ui/badge'
 import { FilterOption } from '@/components/ui/data-table-filter'
 import { useRouter } from 'next/navigation'
+import { User } from '../users/columns'
 
-export type User = {
+import dayjs from '@/lib/dayjs'
+
+export type Environment = {
   id: string
   name: string
-  email: string
-  cpf: string
-  birth_date: Date
-  status: UserStatus
   groups: FilterOption[]
-  photo_uploaded_at: Date | null
   last_access: {
-    environment: FilterOption
+    user: User
     access_at: Date
   }
 }
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<Environment>[] = [
   {
     accessorKey: 'name',
     header: 'Nome',
     enableSorting: true,
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email',
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    enableSorting: false,
-    cell: ({ row }) => (
-      <Badge
-        variant={row.original.status.value === 'active' ? 'default' : 'outline'}
-      >
-        {row.original.status.label}
-      </Badge>
-    ),
-    meta: {
-      style: {
-        align: 'center',
-      },
-    },
   },
   {
     accessorKey: 'groups',
@@ -89,7 +63,7 @@ export const columns: ColumnDef<User>[] = [
     header: 'Último acesso',
     enableSorting: false,
     cell: ({ row }) => {
-      return row.original.last_access.environment.label
+      return `${row.original.last_access.user.name} | ${dayjs(row.original.last_access.access_at).format('DD MMM [de] YYYY [ás] HH:mm')}`
     },
   },
   {
