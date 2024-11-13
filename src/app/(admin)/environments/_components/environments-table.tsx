@@ -22,8 +22,6 @@ export const EnvironmentsTable: ComponentType<EnvironmentsTableProps> = ({
   environments,
   totalCount,
 }) => {
-
-
   const [sorting, setSorting] = useSorting()
   const [pagination, setPagination] = usePagination()
   const [filters, setFilters] = useFilter()

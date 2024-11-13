@@ -198,7 +198,6 @@ export function DataTableHeadInfo<TData>({
 }: DataTableHeadInfoProps<TData>) {
   const {
     pagination: { pageIndex, pageSize },
-    
   } = table.getState()
 
   const start = pageSize * pageIndex + 1
@@ -206,7 +205,9 @@ export function DataTableHeadInfo<TData>({
 
   return (
     <div className="text-xs text-muted-foreground">
-      Mostrando {start} - {end <= table.getRowCount() ? end : table.getRowCount()} de {table.getRowCount()}
+      Mostrando {start} -{' '}
+      {end <= table.getRowCount() ? end : table.getRowCount()} de{' '}
+      {table.getRowCount()}
     </div>
   )
 }

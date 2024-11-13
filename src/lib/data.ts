@@ -3,6 +3,8 @@ import { FilterOption } from '@/components/ui/data-table-filter'
 import { User } from '@/app/(admin)/users/columns'
 import { Environment } from '@/app/(admin)/environments/columns'
 
+faker.seed(42)
+
 export type UserStatus = {
   value: 'active' | 'deactive'
   label: string
@@ -60,12 +62,10 @@ export const environments = [
   'Laboratório 4',
 ]
 
-export const environmentOptions: FilterOption[] = environments.map(e => ({
+export const environmentOptions: FilterOption[] = environments.map((e) => ({
   label: e,
   value: faker.string.uuid(),
 }))
-
-faker.seed(42)
 
 export const fakeUsers: User[] = Array.from({ length: 52 }).map((_, index) => {
   const firstName = faker.person.firstName()
@@ -114,6 +114,11 @@ export const fakeEnvironments: Environment[] = environmentOptions.map((e) => {
     max: groupOptions.length + 1,
   })
 
+  const createdAt = faker.date.between({
+    from: '2016-01-01',
+    to: '2018-01-01',
+  })
+
   return {
     id: e.value,
     name: e.label,
@@ -125,7 +130,8 @@ export const fakeEnvironments: Environment[] = environmentOptions.map((e) => {
           max: fakeUsers.length - 1,
         })
       ],
-      access_at: faker.date.between({ from: '2018-01-01', to: Date.now() }),
+      access_at: faker.date.between({ from: createdAt, to: Date.now() }),
     },
+    created_at: createdAt,
   }
 })

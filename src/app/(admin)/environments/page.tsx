@@ -11,7 +11,11 @@ const UsersPage: NextPage<{
   const { pageIndex, pageSize, sortKey, sortDesc, filters } =
     searchParamsCache.parse(searchParams)
 
-  let environments = sortKey ? fakeEnvironments.toSorted((a, b) => sortEnvironmentsByName(a, b, sortDesc)) : fakeEnvironments
+  let environments = sortKey
+    ? fakeEnvironments.toSorted((a, b) =>
+        sortEnvironmentsByName(a, b, sortDesc),
+      )
+    : fakeEnvironments
 
   let groupsFilter: string[] = []
 
@@ -26,20 +30,21 @@ const UsersPage: NextPage<{
   })
 
   if (groupsFilter.length)
-    environments = environments.filter((e) => e.groups.some((g) => groupsFilter.includes(g.value)))
+    environments = environments.filter((e) =>
+      e.groups.some((g) => groupsFilter.includes(g.value)),
+    )
 
   const totalCount = environments.length
 
-  environments = environments.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+  environments = environments.slice(
+    pageIndex * pageSize,
+    (pageIndex + 1) * pageSize,
+  )
 
   return (
     <div className="p-6">
-      <EnvironmentsTable
-        environments={environments}
-        totalCount={totalCount}
-      />
+      <EnvironmentsTable environments={environments} totalCount={totalCount} />
     </div>
-   
   )
 }
 

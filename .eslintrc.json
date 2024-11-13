@@ -1,3 +1,4 @@
 {
-  "extends": ["@rocketseat/eslint-config/next","next/core-web-vitals", "next/typescript"]
+  "extends": ["@rocketseat/eslint-config/next","next/core-web-vitals", "next/typescript"],
+  "plugins": ["@tanstack/eslint-plugin-query"]
 }

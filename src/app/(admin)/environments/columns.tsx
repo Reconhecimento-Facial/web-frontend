@@ -25,6 +25,7 @@ export type Environment = {
     user: User
     access_at: Date
   }
+  created_at: Date
 }
 
 export const columns: ColumnDef<Environment>[] = [
@@ -81,7 +82,9 @@ export const columns: ColumnDef<Environment>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => push(`/users/${row.original.id}`)}>
+            <DropdownMenuItem
+              onClick={() => push(`/environments/${row.original.id}`)}
+            >
               Ver Perfil
             </DropdownMenuItem>
 

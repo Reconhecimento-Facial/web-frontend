@@ -85,9 +85,7 @@ export default function UserProfilePage({
                 <span className="mr-2">
                   {user.last_access.environment.label}
                 </span>
-                {user.last_access.access_at.toLocaleDateString('pt-BR', {
-                  
-                })}
+                {user.last_access.access_at.toLocaleDateString('pt-BR', {})}
               </p>
             </div>
             <div>
