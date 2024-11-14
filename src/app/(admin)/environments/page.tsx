@@ -17,10 +17,14 @@ const UsersPage: NextPage<{
       )
     : fakeEnvironments
 
+  let nameFilter = ''
   let groupsFilter: string[] = []
 
   filters.forEach((f) => {
     switch (f.id) {
+      case 'name':
+        nameFilter = f.value as string
+        break
       case 'groups':
         groupsFilter = f.value as string[]
         break
@@ -29,10 +33,25 @@ const UsersPage: NextPage<{
     }
   })
 
-  if (groupsFilter.length)
-    environments = environments.filter((e) =>
-      e.groups.some((g) => groupsFilter.includes(g.value)),
-    )
+  const hasFilters = nameFilter || groupsFilter.length
+
+  if (hasFilters)
+    environments = environments.filter((e) => {
+      console.log('env', e.name)
+      if (
+        nameFilter &&
+        !e.name.toLowerCase().includes(nameFilter.toLowerCase())
+      )
+        return false
+
+      if (
+        groupsFilter.length &&
+        !e.groups.some((g) => groupsFilter.includes(g.value))
+      )
+        return false
+
+      return true
+    })
 
   const totalCount = environments.length
 

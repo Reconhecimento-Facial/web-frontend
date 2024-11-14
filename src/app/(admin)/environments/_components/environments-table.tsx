@@ -104,7 +104,7 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
           className="max-w-sm"
           defaultValue={`${nameColumn?.getFilterValue() || ''}`}
           onChange={handleSearch}
-          placeholder="Buscar usuário"
+          placeholder="Buscar ambiente"
         />
 
         {groupsColumn && (
@@ -116,7 +116,7 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
         )}
       </div>
       <div>
-        <Button>Adicionar Usuário</Button>
+        <Button>Adicionar Ambiente</Button>
       </div>
     </div>
   )
