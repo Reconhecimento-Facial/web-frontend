@@ -19,7 +19,7 @@ const EnvironmentPage: NextPage<EnvironmentPageProps> = ({ params }) => {
   if (!environment) return <div>Ambiente não encontrado</div>
 
   return (
-    <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-2">
       <div className="">
         <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
           {environment.name}
@@ -48,7 +48,7 @@ const EnvironmentPage: NextPage<EnvironmentPageProps> = ({ params }) => {
       </div>
 
       <div className="">
-        <EnvironmentPanels />
+        <EnvironmentPanels environmentId={environmentId} />
       </div>
     </div>
   )

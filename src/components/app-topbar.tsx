@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { AppUserMenu } from './app-user-menu'
 import { Separator } from './ui/separator'
-import { SidebarTrigger, useSidebar } from './ui/sidebar'
+import { SidebarTrigger } from './ui/sidebar'
 
 import {
   Breadcrumb,
@@ -16,10 +16,11 @@ import {
 import { breadcrumbs } from '@/app/breadcrumbs'
 import { Fragment } from 'react'
 import { ThemeToggle } from './theme-toggle'
+import { useMediaQuery } from '@/hooks/use-media-query'
 
 export function AppTopbar() {
   const pathname = usePathname()
-  const { isMobile } = useSidebar()
+  const isLarge = useMediaQuery('(min-width: 1024px)')
 
   const paths = pathname.split('/').filter(Boolean) as Array<
     keyof typeof breadcrumbs
@@ -32,7 +33,7 @@ export function AppTopbar() {
     <header className="flex h-16 shrink-0 items-center justify-between gap-2 border transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
-        {currentPage && !isMobile && (
+        {currentPage && isLarge && (
           <>
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>

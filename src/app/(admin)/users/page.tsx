@@ -69,6 +69,9 @@ const UsersPage: NextPage<{
 
   return (
     <div className="p-6">
+      <h2 className="mb-4 scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+        Usuários
+      </h2>
       <UsersTable totalCount={totalCount} users={users} />
     </div>
   )
