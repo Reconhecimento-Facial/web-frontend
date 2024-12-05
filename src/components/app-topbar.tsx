@@ -46,7 +46,7 @@ export function AppTopbar() {
                   <Fragment key={p}>
                     <BreadcrumbItem className="hidden md:block">
                       <BreadcrumbLink
-                        href={paths.slice(0, index + 1).join('/')}
+                        href={`/${paths.slice(0, index + 1).join('/')}`}
                         aria-label={`Ir para ${breadcrumbs[p] || p}`}
                       >
                         {breadcrumbs[p] || p}
@@ -55,7 +55,6 @@ export function AppTopbar() {
                     <BreadcrumbSeparator className="hidden md:block" />
                   </Fragment>
                 ))}
-
                 <BreadcrumbItem>
                   <BreadcrumbPage>
                     {breadcrumbs[currentPage] || currentPage}

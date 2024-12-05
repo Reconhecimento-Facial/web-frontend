@@ -15,14 +15,14 @@ import {
 import { UserStatus } from '@/lib/data'
 import { Badge } from '@/components/ui/badge'
 import { FilterOption } from '@/components/ui/data-table-filter'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export type User = {
   id: string
   name: string
   email: string
   cpf: string
-  birth_date: Date
+  dateOfBirth: Date
   status: UserStatus
   groups: FilterOption[]
   photo_uploaded_at: Date | null
@@ -95,9 +95,6 @@ export const columns: ColumnDef<User>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { push } = useRouter()
-
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -107,11 +104,17 @@ export const columns: ColumnDef<User>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => push(`/users/${row.original.id}`)}>
-              Ver Perfil
+            <DropdownMenuItem asChild>
+              <Link href={`/users/${row.original.id}`} prefetch={false}>
+                Ver Perfil
+              </Link>
             </DropdownMenuItem>
 
-            <DropdownMenuItem>Editar</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/users/${row.original.id}/edit`} prefetch={false}>
+                Editar
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem className="text-destructive">
               Excluir
             </DropdownMenuItem>

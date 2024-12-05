@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import { FilterOption } from '@/components/ui/data-table-filter'
 import { User } from '@/app/(admin)/users/columns'
 import { Environment } from '@/app/(admin)/environments/columns'
+import { Group } from 'lucide-react'
 
 faker.seed(42)
 
@@ -21,7 +22,7 @@ export const statusOptions: UserStatus[] = [
   },
 ]
 
-export const groupOptions: FilterOption[] = [
+export const userGroupOptions: FilterOption[] = [
   {
     label: 'Coordenador',
     value: '1',
@@ -45,6 +46,29 @@ export const groupOptions: FilterOption[] = [
   {
     label: 'SECOMP',
     value: '6',
+  },
+]
+
+export const environmentGroupOptions: FilterOption[] = [
+  {
+    label: 'Salas de Aula',
+    value: '1',
+    icon: <Group className="mr-2 h-4 w-4 text-muted-foreground" />,
+  },
+  {
+    label: 'Laboratórios',
+    value: '2',
+    icon: <Group className="mr-2 h-4 w-4 text-muted-foreground" />,
+  },
+  {
+    label: 'Escritórios',
+    value: '3',
+    icon: <Group className="mr-2 h-4 w-4 text-muted-foreground" />,
+  },
+  {
+    label: 'Auditórios',
+    value: '4',
+    icon: <Group className="mr-2 h-4 w-4 text-muted-foreground" />,
   },
 ]
 
@@ -74,12 +98,12 @@ export const fakeUsers: User[] = Array.from({ length: 52 }).map((_, index) => {
 
   const groupStartIndex = faker.number.int({
     min: 0,
-    max: groupOptions.length - 4,
+    max: environmentGroupOptions.length - 4,
   })
 
   let groupEndIndex = faker.number.int({
     min: groupStartIndex,
-    max: groupOptions.length,
+    max: environmentGroupOptions.length,
   })
 
   if (groupStartIndex - groupEndIndex === 0) groupEndIndex += 1
@@ -89,9 +113,9 @@ export const fakeUsers: User[] = Array.from({ length: 52 }).map((_, index) => {
     name: `${firstName} ${lastName}`,
     email,
     cpf: faker.string.numeric(11),
-    birth_date: faker.date.birthdate(),
+    dateOfBirth: faker.date.birthdate(),
     status: statusOptions[index % 2],
-    groups: groupOptions.slice(groupStartIndex, groupEndIndex),
+    groups: environmentGroupOptions.slice(groupStartIndex, groupEndIndex),
     photo_uploaded_at:
       index % 2
         ? faker.date.between({ from: '2018-01-01', to: Date.now() })
@@ -106,12 +130,12 @@ export const fakeUsers: User[] = Array.from({ length: 52 }).map((_, index) => {
 export const fakeEnvironments: Environment[] = environmentOptions.map((e) => {
   const groupStartIndex = faker.number.int({
     min: 0,
-    max: groupOptions.length - 4,
+    max: userGroupOptions.length - 4,
   })
 
   const groupEndIndex = faker.number.int({
     min: groupStartIndex + 1,
-    max: groupOptions.length + 1,
+    max: userGroupOptions.length + 1,
   })
 
   const createdAt = faker.date.between({
@@ -122,7 +146,7 @@ export const fakeEnvironments: Environment[] = environmentOptions.map((e) => {
   return {
     id: e.value,
     name: e.label,
-    groups: groupOptions.slice(groupStartIndex, groupEndIndex),
+    groups: userGroupOptions.slice(groupStartIndex, groupEndIndex),
     last_access: {
       user: fakeUsers[
         faker.number.int({

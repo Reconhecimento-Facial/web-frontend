@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { useDebouncedCallback } from 'use-debounce'
 import { Table } from '@tanstack/react-table'
 import { DataTableFilter } from '@/components/ui/data-table-filter'
-import { groupOptions } from '@/lib/data'
+import { environmentGroupOptions } from '@/lib/data'
 import { Button } from '@/components/ui/button'
 
 type EnvironmentsTableProps = {
@@ -111,7 +111,7 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
           <DataTableFilter
             column={groupsColumn}
             title="Grupos"
-            options={groupOptions}
+            options={environmentGroupOptions}
           />
         )}
       </div>

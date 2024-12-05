@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { Column } from '@tanstack/react-table'
 
@@ -20,7 +22,7 @@ import { CheckIcon, CirclePlus } from 'lucide-react'
 export type FilterOption = {
   label: string
   value: string
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: React.ReactNode
 }
 
 interface DataTableFacetedFilterProps<TData, TValue> {
@@ -110,9 +112,10 @@ export function DataTableFilter<TData, TValue>({
                     >
                       <CheckIcon className={cn('h-4 w-4')} />
                     </div>
-                    {option.icon && (
+                    {option.icon}
+                    {/* {option.icon && (
                       <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-                    )}
+                    )} */}
                     <span>{option.label}</span>
                   </CommandItem>
                 )

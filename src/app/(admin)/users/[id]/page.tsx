@@ -72,7 +72,7 @@ export default function UserProfilePage({
                 Data de Nascimento
               </label>
               <p className="mt-1">
-                {user.birth_date.toLocaleDateString('pt-BR')}
+                {user.dateOfBirth.toLocaleDateString('pt-BR')}
               </p>
             </div>
           </div>

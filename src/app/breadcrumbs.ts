@@ -1,4 +1,6 @@
 export const breadcrumbs = {
   users: 'Usuários',
-  environments: 'Ambientes'
+  environments: 'Ambientes',
+  add: 'Adicionar',
+  edit: 'Editar',
 }
