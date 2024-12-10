@@ -18,11 +18,12 @@ import { FilterOption } from '@/components/ui/data-table-filter'
 import Link from 'next/link'
 
 export type User = {
-  id: string
+  id: number
   name: string
   email: string
   cpf: string
-  dateOfBirth: Date
+  phone_number: string
+  date_of_birth: string
   status: UserStatus
   groups: FilterOption[]
   photo_uploaded_at: Date | null

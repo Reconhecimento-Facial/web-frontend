@@ -1,8 +1,16 @@
 import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { NextPage } from 'next'
 import { RecoveryForm } from './_components/recovery-form'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 
-const AccountRecoveryPage: NextPage = () => {
+const AccountRecoveryPage: NextPage = async () => {
+  const session = await auth()
+
+  if (session?.user) {
+    redirect('/users')
+  }
+
   return (
     <>
       <CardHeader className="mx-auto max-w-md space-y-8 sm:max-w-full">

@@ -81,9 +81,7 @@ export function UserForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit, (errors) => {
-          console.log('errors', errors, form.getValues())
-        })}
+        onSubmit={form.handleSubmit(onSubmit)}
         className={cn('grid grid-cols-3 gap-4', className)}
       >
         <FormField

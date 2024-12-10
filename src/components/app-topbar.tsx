@@ -25,6 +25,7 @@ export function AppTopbar() {
   const paths = pathname.split('/').filter(Boolean) as Array<
     keyof typeof breadcrumbs
   >
+
   const currentPage = paths
     .splice(paths.length - 1, 1)
     .join() as keyof typeof breadcrumbs

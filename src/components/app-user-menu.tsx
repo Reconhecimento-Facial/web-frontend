@@ -11,7 +11,18 @@ import {
 import { ChevronsUpDown } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 
+import { signOut, useSession } from 'next-auth/react'
+
 export function AppUserMenu() {
+  const { data: session } = useSession()
+  const user = session?.user
+
+  const handleLogout = async () => {
+    await signOut({ redirect: true, redirectTo: '/login' })
+  }
+
+  if (!user) return null
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2">
@@ -20,7 +31,7 @@ export function AppUserMenu() {
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
 
-        <span className="truncate text-sm">John Doe</span>
+        <span className="truncate text-sm">{user.name}</span>
 
         <ChevronsUpDown className="ml-auto" />
       </DropdownMenuTrigger>
@@ -31,7 +42,9 @@ export function AppUserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem>Perfil</DropdownMenuItem>
 
-        <DropdownMenuItem className="text-destructive">Sair</DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+          Sair
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

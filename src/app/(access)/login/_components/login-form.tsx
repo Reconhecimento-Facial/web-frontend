@@ -18,6 +18,8 @@ import { NextComponentType } from 'next'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 const loginSchema = z.object({
   email: z
@@ -26,13 +28,23 @@ const loginSchema = z.object({
   password: z.string({ required_error: 'Campo obrigatório' }),
 })
 
+type LoginInputs = z.infer<typeof loginSchema>
+
 export const LoginForm: NextComponentType = () => {
-  const form = useForm({
+  const router = useRouter()
+
+  const form = useForm<LoginInputs>({
     resolver: zodResolver(loginSchema),
   })
 
-  const onSubmit = () => {
-    console.log('form submitted')
+  const onSubmit = async (formData: LoginInputs) => {
+    console.log('form submitted', formData)
+    await signIn('credentials', {
+      ...formData,
+      redirect: false,
+      redirectTo: '/users',
+    })
+    router.push('/users')
   }
 
   return (
@@ -59,7 +71,11 @@ export const LoginForm: NextComponentType = () => {
               <FormItem className="mb-6">
                 <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <Input placeholder="Insira sua senha" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="Insira sua senha"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

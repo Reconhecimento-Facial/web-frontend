@@ -37,7 +37,6 @@ const UsersPage: NextPage<{
 
   if (hasFilters)
     environments = environments.filter((e) => {
-      console.log('env', e.name)
       if (
         nameFilter &&
         !e.name.toLowerCase().includes(nameFilter.toLowerCase())

@@ -9,8 +9,6 @@ export default function EditPage({ params }: { params: { id: string } }) {
 
   if (!user) return <div>Usuário não encontrado</div>
 
-  console.log('USUARIO EDIT', user)
-
   return (
     <div className="p-6">
       <h2 className="mb-4 scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
