@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/app-providers'
 
+import { Toaster } from '@/components/ui/toaster'
+
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
@@ -19,9 +21,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   )

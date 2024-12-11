@@ -19,6 +19,7 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { signIn } from 'next-auth/react'
+import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 
 const loginSchema = z.object({
@@ -31,20 +32,44 @@ const loginSchema = z.object({
 type LoginInputs = z.infer<typeof loginSchema>
 
 export const LoginForm: NextComponentType = () => {
-  const router = useRouter()
-
   const form = useForm<LoginInputs>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   })
 
+  const { isSubmitting } = form.formState
+
+  const router = useRouter()
+
+  const { toast } = useToast()
+
   const onSubmit = async (formData: LoginInputs) => {
-    console.log('form submitted', formData)
-    await signIn('credentials', {
+    const response = await signIn('credentials', {
       ...formData,
       redirect: false,
-      redirectTo: '/users',
     })
-    router.push('/users')
+
+    const error = response?.error
+    const code = response?.code
+
+    if (!error) return router.replace('/users')
+
+    if (code === 'invalid-credentials') {
+      toast({
+        variant: 'destructive',
+        title: 'Credenciais inválidas',
+        description: 'Por favor, verifique suas credenciais e tente novamente.',
+      })
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Ops! Algo de errado ocorreu.',
+        description: 'Por favor, tente novamente mais tarde.',
+      })
+    }
   }
 
   return (
@@ -87,7 +112,7 @@ export const LoginForm: NextComponentType = () => {
           </Link>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="w-full">
+          <Button loading={isSubmitting} type="submit" className="w-full">
             Entrar
           </Button>
         </CardFooter>

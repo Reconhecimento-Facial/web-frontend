@@ -1,67 +1,71 @@
-import NextAuth from 'next-auth'
+import NextAuth, { CredentialsSignin } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
+import { ServerError } from './app/api/_errors/ServerError'
+import { InvalidCredentials } from './app/api/_errors/InvalidCredentials'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
-      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-      // e.g. domain, username, password, 2FA token, etc.
       credentials: {
         email: {},
         password: {},
       },
       authorize: async (credentials) => {
-        let user = null
+        try {
+          let user = null
 
-        const headers = new Headers()
-
-        headers.append('Content-Type', 'application/x-www-form-urlencoded')
-
-        const body = new URLSearchParams({
-          username: credentials.email as string,
-          password: credentials.password as string,
-          grant_type: 'password',
-        }).toString()
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/token`,
-          {
-            method: 'POST',
-            headers,
-            body,
-          },
-        )
-
-        const data = await response.json()
-
-        if (response.status !== 200) {
-          throw new Error('Invalid credentials.')
-        }
-        const token = data.access_token
-
-        const profileResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/admins/profile`,
-          {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              accept: 'application/json',
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/token`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({
+                username: credentials.email as string,
+                password: credentials.password as string,
+                grant_type: 'password',
+              }).toString(),
             },
-          },
-        )
+          )
 
-        user = await profileResponse.json()
+          const data = await response.json()
 
-        console.log('USER ================ ', user)
+          if (response.status === 400) {
+            throw new InvalidCredentials()
+          } else if (response.status !== 200) {
+            throw new ServerError()
+          }
 
-        if (!user) {
-          // No user found, so this is their first attempt to login
-          // Optionally, this is also the place you could do a user registration
-          throw new Error('Invalid credentials.')
+          const token = data.access_token
+
+          const profileResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/admins/profile`,
+            {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                accept: 'application/json',
+              },
+            },
+          )
+
+          if (profileResponse.status !== 200) {
+            throw new ServerError()
+          }
+
+          user = await profileResponse.json()
+
+          if (!user) {
+            throw new Error('Invalid credentials.')
+          }
+
+          return { ...user, access_token: token }
+        } catch (error) {
+          if (error instanceof CredentialsSignin) throw error
+
+          throw new ServerError()
         }
-
-        // return user object with their profile data
-        return user
       },
     }),
   ],
@@ -100,5 +104,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       }
     },
+  },
+  pages: {
+    signIn: '/login',
   },
 })
