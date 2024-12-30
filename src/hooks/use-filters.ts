@@ -11,7 +11,7 @@ const filterSchema: z.ZodType<ColumnFilter> = z.object({
 export const filtersParser = parseAsArrayOf(parseAsJson(filterSchema.parse))
   .withDefault([])
   .withOptions({
-    shallow: false,
+    shallow: true,
     history: 'push',
   })
 

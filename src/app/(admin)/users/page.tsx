@@ -1,92 +1,60 @@
+'use client'
+
 import { NextPage } from 'next'
 
 import { UsersTable } from './_components/users-table'
-import { fakeUsers } from '@/lib/data'
 
-import { searchParamsCache } from './searchParams'
-import { User } from './columns'
+import { useSorting } from '@/hooks/use-sorting'
+import { usePagination } from '@/hooks/use-pagination'
+import { useFilter } from '@/hooks/use-filters'
+import { useUsers } from '@/hooks/data/use-users'
 
 const UsersPage: NextPage<{
   searchParams: { [key: string]: string | string[] | undefined }
-}> = ({ searchParams }) => {
-  const { pageIndex, pageSize, sortKey, sortDesc, filters } =
-    searchParamsCache.parse(searchParams)
+}> = () => {
+  const [sorting, setSorting] = useSorting()
+  const [pagination, setPagination] = usePagination()
+  const [filters, setFilters] = useFilter()
 
-  let users = sortKey
-    ? fakeUsers.toSorted((a, b) => {
-        if (sortKey === 'name') return sortUsersByName(a, b, sortDesc)
-
-        return sortUsersByEmail(a, b, sortDesc)
-      })
-    : fakeUsers
-
-  let nameFilter = ''
-  let statusFilter: string[] = []
-  let groupsFilter: string[] = []
-
-  filters.forEach((f) => {
-    switch (f.id) {
-      case 'name':
-        nameFilter = f.value as string
-        break
-      case 'status':
-        statusFilter = f.value as string[]
-
-        break
-      case 'groups':
-        groupsFilter = f.value as string[]
-        break
-      default:
-        break
-    }
-  })
-
-  const hasFilters = nameFilter || statusFilter.length || groupsFilter.length
-
-  if (hasFilters)
-    users = users.filter((u) => {
-      if (
-        nameFilter &&
-        !u.name.toLowerCase().includes(nameFilter.toLowerCase())
-      )
-        return false
-
-      if (statusFilter.length && !statusFilter.includes(u.status.value))
-        return false
-
-      if (
-        groupsFilter.length &&
-        !u.groups.some((g) => groupsFilter.includes(g.value))
-      )
-        return false
-
-      return true
-    })
-
-  const totalCount = users.length
-
-  users = users.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+  const { data, isPending } = useUsers(pagination, sorting, filters)
 
   return (
     <div className="p-6">
       <h2 className="mb-4 scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
         Usuários
       </h2>
-      <UsersTable totalCount={totalCount} users={users} />
+      <UsersTable
+        isPending={isPending}
+        users={data?.items || []}
+        totalCount={data?.total || 0}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        sorting={[sorting]}
+        onSortingChange={(updater) => {
+          const newSortingValue =
+            updater instanceof Function
+              ? updater([
+                  {
+                    desc: sorting.desc,
+                    id: sorting.id,
+                  },
+                ])
+              : updater
+
+          if (!newSortingValue[0]) setSorting({ id: '', desc: false })
+          else
+            setSorting({
+              desc: newSortingValue[0].desc,
+              id: newSortingValue[0].id,
+            })
+
+          setPagination({ pageIndex: 0 })
+        }}
+        filters={filters}
+        onColumnFiltersChange={setFilters}
+      />
     </div>
   )
 }
 
 export default UsersPage
-
-function sortUsersByName(a: User, b: User, desc: boolean) {
-  if (desc) return a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1
-
-  return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
-}
-
-function sortUsersByEmail(a: User, b: User, desc: boolean) {
-  if (desc) return a.email.toLowerCase() > b.email.toLowerCase() ? -1 : 1
-
-  return a.email.toLowerCase() > b.email.toLowerCase() ? 1 : -1
-}

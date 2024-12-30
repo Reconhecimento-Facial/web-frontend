@@ -11,7 +11,8 @@ import { useDebouncedCallback } from 'use-debounce'
 import { Table } from '@tanstack/react-table'
 import { DataTableFilter } from '@/components/ui/data-table-filter'
 import { environmentGroupOptions } from '@/lib/data'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import Link from 'next/link'
 
 type EnvironmentsTableProps = {
   environments: Environment[]
@@ -40,17 +41,17 @@ export const EnvironmentsTable: ComponentType<EnvironmentsTableProps> = ({
             updater instanceof Function
               ? updater([
                   {
-                    desc: sorting.sortDesc,
-                    id: sorting.sortKey,
+                    desc: sorting.desc,
+                    id: sorting.id,
                   },
                 ])
               : updater
 
-          if (!newSortingValue[0]) setSorting({ sortKey: '', sortDesc: false })
+          if (!newSortingValue[0]) setSorting({ id: '', desc: false })
           else
             setSorting({
-              sortDesc: newSortingValue[0].desc,
-              sortKey: newSortingValue[0].id,
+              desc: newSortingValue[0].desc,
+              id: newSortingValue[0].id,
             })
 
           setPagination({ pageIndex: 0 })
@@ -69,8 +70,8 @@ export const EnvironmentsTable: ComponentType<EnvironmentsTableProps> = ({
         state={{
           sorting: [
             {
-              desc: sorting.sortDesc,
-              id: sorting.sortKey,
+              desc: sorting.desc,
+              id: sorting.id,
             },
           ],
           pagination,
@@ -116,7 +117,9 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
         )}
       </div>
       <div>
-        <Button>Adicionar Ambiente</Button>
+        <Link href={'/environments/add'} className={buttonVariants()}>
+          Adicionar Ambiente
+        </Link>
       </div>
     </div>
   )

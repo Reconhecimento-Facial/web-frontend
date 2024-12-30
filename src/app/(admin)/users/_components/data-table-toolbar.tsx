@@ -1,14 +1,14 @@
 'use client'
 
 import { Table } from '@tanstack/react-table'
-import { User } from '../columns'
 import { ChangeEvent } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 import { DataTableFilter } from '@/components/ui/data-table-filter'
 import { Input } from '@/components/ui/input'
-import { statusOptions, userGroupOptions } from '@/lib/data'
+import { statusOptions } from '@/lib/data'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
+import { User } from '@/models/user'
 
 interface DataTableToolbarProps {
   table: Table<User>
@@ -25,7 +25,6 @@ export function DataTableToolbar({ table }: DataTableToolbarProps) {
   )
 
   const statusColumn = table.getColumn('status')
-  const groupsColumn = table.getColumn('groups')
 
   return (
     <div className="mb-6 flex flex-wrap items-stretch justify-between gap-4">
@@ -42,14 +41,7 @@ export function DataTableToolbar({ table }: DataTableToolbarProps) {
             column={statusColumn}
             title="Status"
             options={statusOptions}
-          />
-        )}
-
-        {groupsColumn && (
-          <DataTableFilter
-            column={groupsColumn}
-            title="Grupos"
-            options={userGroupOptions}
+            singleValue
           />
         )}
       </div>

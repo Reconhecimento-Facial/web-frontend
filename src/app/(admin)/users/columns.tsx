@@ -12,26 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import { UserStatus } from '@/lib/data'
 import { Badge } from '@/components/ui/badge'
-import { FilterOption } from '@/components/ui/data-table-filter'
-import Link from 'next/link'
 
-export type User = {
-  id: number
-  name: string
-  email: string
-  cpf: string
-  phone_number: string
-  date_of_birth: string
-  status: UserStatus
-  groups: FilterOption[]
-  photo_uploaded_at: Date | null
-  last_access: {
-    environment: FilterOption
-    access_at: Date
-  }
-}
+import Link from 'next/link'
+import { User } from '@/models/user'
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -48,10 +32,8 @@ export const columns: ColumnDef<User>[] = [
     header: 'Status',
     enableSorting: false,
     cell: ({ row }) => (
-      <Badge
-        variant={row.original.status.value === 'active' ? 'default' : 'outline'}
-      >
-        {row.original.status.label}
+      <Badge variant={row.original.status === 'active' ? 'default' : 'outline'}>
+        {row.original.status === 'active' ? 'Ativo' : 'Desativado'}
       </Badge>
     ),
     meta: {
@@ -61,36 +43,11 @@ export const columns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: 'groups',
-    header: 'Grupos',
-    cell: ({ row }) => {
-      const groupsToShown = row.original.groups.slice(0, 3)
-      const diff = row.original.groups.length - 3
-
-      return (
-        <>
-          {groupsToShown.map((g) => g.label).join(', ')}{' '}
-          {diff > 0 && (
-            <div className="mx-auto w-fit text-xs text-muted-foreground">
-              {`+${diff} ${diff > 1 ? 'Grupos' : 'Grupo'} `}
-            </div>
-          )}
-        </>
-      )
-    },
-    meta: {
-      style: {
-        align: 'center',
-      },
-    },
-    enableSorting: false,
-  },
-  {
     accessorKey: 'last_access',
     header: 'Último acesso',
     enableSorting: false,
-    cell: ({ row }) => {
-      return row.original.last_access.environment.label
+    cell: () => {
+      return <div></div>
     },
   },
   {

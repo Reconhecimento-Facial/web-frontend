@@ -41,6 +41,8 @@ import {
 } from './select'
 
 import { Checkbox } from './checkbox'
+import { useMemo } from 'react'
+import { Skeleton } from './skeleton'
 
 interface DataTableProps<TData, TValue>
   extends Omit<TableOptions<TData>, 'getCoreRowModel'> {
@@ -49,43 +51,71 @@ interface DataTableProps<TData, TValue>
   pagination?: boolean
   selectable?: boolean
   Toolbar: React.ComponentType<{ table: TableType<TData> }>
+  isPending?: boolean
 }
 
 export function DataTable<TData, TValue>({
-  columns,
-  data,
+  columns: columnsProps,
+  data: dataProps,
   pagination = false,
   selectable = true,
   Toolbar,
+  isPending = false,
   ...props
 }: DataTableProps<TData, TValue>) {
-  const colSorting: ColumnDef<TData> = {
-    id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  }
+  const colSorting: ColumnDef<TData> = useMemo(
+    () => ({
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    }),
+    [],
+  )
+
+  const tableData = useMemo(
+    () =>
+      isPending
+        ? Array(props.state?.pagination?.pageSize || 10).fill({})
+        : dataProps,
+    [isPending, props.state?.pagination?.pageSize, dataProps],
+  )
+
+  const tableColumns = useMemo(() => {
+    let columns = selectable ? [colSorting, ...columnsProps] : columnsProps
+
+    if (isPending) {
+      columns = columns.map((col) => ({
+        ...col,
+        cell: () => <Skeleton className="h-4" />,
+      }))
+
+      columns[0].header = () => <Checkbox disabled aria-label="Select all" />
+    }
+
+    return columns
+  }, [isPending, columnsProps, selectable, colSorting])
 
   const table = useReactTable({
     ...props,
-    data,
-    columns: selectable ? [colSorting, ...columns] : columns,
+    data: tableData,
+    columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   })
@@ -146,7 +176,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={tableColumns.length}
                   className="h-24 text-center"
                 >
                   Sem resultados

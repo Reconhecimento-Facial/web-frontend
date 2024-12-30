@@ -29,12 +29,14 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   column: Column<TData, TValue>
   title: string
   options: FilterOption[]
+  singleValue?: boolean
 }
 
 export function DataTableFilter<TData, TValue>({
   column,
   title,
   options,
+  singleValue = false,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const selectedValues = new Set(column?.getFilterValue() as string[])
 
@@ -94,6 +96,7 @@ export function DataTableFilter<TData, TValue>({
                       if (isSelected) {
                         selectedValues.delete(option.value)
                       } else {
+                        if (singleValue) selectedValues.clear()
                         selectedValues.add(option.value)
                       }
                       const filterValues = Array.from(selectedValues)

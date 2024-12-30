@@ -17,6 +17,6 @@ export const serialize = createSerializer(paginationParams)
 export function usePagination() {
   return useQueryStates(paginationParams, {
     history: 'push',
-    shallow: false,
+    shallow: true,
   })
 }
