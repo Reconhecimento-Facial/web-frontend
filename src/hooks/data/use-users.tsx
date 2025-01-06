@@ -49,7 +49,7 @@ export const useUsers = (
 
       const data = await response.json()
 
-      return data as { items: User[] } & Pagination
+      return data as Pagination<User>
     },
   })
 }

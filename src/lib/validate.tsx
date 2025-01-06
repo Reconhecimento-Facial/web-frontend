@@ -15,16 +15,20 @@ const ALLOWED_MIME_TYPES = [
   },
 ]
 
-export function validatePhoto(f: unknown): string | undefined {
+export function validatePhoto(f: unknown): string | true {
+  console.log('photo', f)
   if (!(f instanceof FileList)) return 'Insira um arquivo válido'
 
+  console.log('teste')
   if (!f.length) return 'Campo obrigatório'
-
+  console.log('teste222')
   if (f[0] && f[0].size >= MAX_FILE_SIZE)
     return 'O tamanho máximo do arquivo deve ser de 5MB'
-
+  console.log('teste333332')
   if (!ALLOWED_MIME_TYPES.map((m) => m.type).includes(f[0].type))
     return `Tipo de arquivo inválido. Arquivos suportados: ${ALLOWED_MIME_TYPES.map((m) => m.extension).join(', ')}`
+
+  return true
 }
 
 export function validateCPF(value: string) {

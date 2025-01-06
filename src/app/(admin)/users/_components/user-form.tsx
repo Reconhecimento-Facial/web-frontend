@@ -1,11 +1,10 @@
 'use client'
 
-import { CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useMaskito } from '@maskito/react'
 import { maskitoTransform } from '@maskito/core'
 
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -15,39 +14,42 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Calendar } from '@/components/ui/calendar'
+
 import { Input } from '@/components/ui/input'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+
+import { cn } from '@/lib/utils'
+import { MultiSelect } from '@/components/ui/multi-select'
+import React from 'react'
+import { userFormSchema } from './utils'
+import { z } from 'zod'
+
+import { cpfMask, phoneNumberMask } from '@/components/input-config'
+import { useInfiniteEnvironments } from '@/hooks/data/use-environments'
+import { useCreateUser } from '@/hooks/data/use-create-user'
+
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { CalendarIcon } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar'
+import { format, startOfDay, subYears } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { useToast } from '@/hooks/use-toast'
+import Link from 'next/link'
 
-import { cn } from '@/lib/utils'
-import { MultiSelect } from '@/components/ui/multi-select'
-import {
-  environmentGroupOptions,
-  environmentOptions,
-  userGroupOptions,
-} from '@/lib/data'
-import React from 'react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { userFormSchema } from './utils'
-import { z } from 'zod'
-import dayjs from '@/lib/dayjs'
-import { cpfMask } from '@/components/input-config'
-
-type UserInputs = z.infer<typeof userFormSchema>
+export type UserInputs = z.infer<typeof userFormSchema>
 
 const defaultValues: Omit<UserInputs, 'photo'> = {
   cpf: '',
   name: '',
   email: '',
-  environments: [],
-  askUser: false,
-  groups: [],
+  environmentIds: [],
   dateOfBirth: new Date(),
+  phoneNumber: '',
 }
 
 type UserFormProps = {
@@ -61,22 +63,54 @@ export function UserForm({
   initialValues,
   footerSlot,
 }: UserFormProps) {
+  const { toast } = useToast()
   const form = useForm<UserInputs>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       ...defaultValues,
       ...initialValues,
       cpf: maskitoTransform(initialValues?.cpf || '', cpfMask),
+      phoneNumber: maskitoTransform(
+        initialValues?.phoneNumber || '',
+        phoneNumberMask,
+      ),
     },
     reValidateMode: 'onChange',
   })
+  const { data } = useInfiniteEnvironments()
+  const { mutateAsync, isPending } = useCreateUser()
 
-  const onSubmit = () => {
-    console.log('Submissão feita')
+  const environmentOptions: { value: string; label: string }[] = React.useMemo(
+    () =>
+      data
+        ? (data.pages
+            .map((p) =>
+              p?.items.map((i) => ({ value: String(i.id), label: i.name })),
+            )
+            .flat()
+            .filter(Boolean) as { value: string; label: string }[])
+        : [],
+    [data],
+  )
+  const onSubmit = async (values: UserInputs) => {
+    console.log('submitted')
+    try {
+      await mutateAsync(values)
+      form.reset()
+      toast({ variant: 'default', description: 'Usuário criado com sucesso!' })
+    } catch {
+      console.log('user sdasdasd')
+      toast({
+        variant: 'destructive',
+        title: 'Ops! Algo de errado ocorreu.',
+        description: 'Por favor, tente novamente mais tarde.',
+      })
+    }
   }
 
   const fileRef = form.register('photo')
   const cpfInputRef = useMaskito({ options: cpfMask })
+  const phoneNumberInputRef = useMaskito({ options: phoneNumberMask })
 
   return (
     <Form {...form}>
@@ -98,6 +132,7 @@ export function UserForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="email"
@@ -135,115 +170,86 @@ export function UserForm({
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="phoneNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>Nº de celular</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Insira o Nº de celular do usuário"
+                  {...field}
+                  ref={phoneNumberInputRef}
+                  onInput={(evt) => {
+                    form.setValue('phoneNumber', evt.currentTarget.value, {
+                      shouldValidate: form.formState.isSubmitted,
+                    })
+                  }}
+                />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
           name="dateOfBirth"
           render={({ field }) => (
-            <FormItem className="">
-              <FormLabel>Data de nascimento</FormLabel>
+            <FormItem className="flex w-full flex-col">
+              <FormLabel required>Data de nascimento</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'flex w-full pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground',
-                      )}
-                    >
-                      {field.value ? (
-                        dayjs(field.value).format('LL')
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
+                  <Button
+                    variant={'outline'}
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !field.value && 'text-muted-foreground',
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {field.value ? (
+                      format(field.value, 'PPP', { locale: ptBR })
+                    ) : (
+                      <span>Selecione uma data</span>
+                    )}
+                  </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date('1900-01-01')
-                    }
-                    initialFocus
+                    autoFocus
+                    startMonth={startOfDay(subYears(new Date(), 150))}
+                    endMonth={startOfDay(new Date())}
+                    locale={ptBR}
                   />
                 </PopoverContent>
               </Popover>
-
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className="space-y-2">
-          <FormField
-            control={form.control}
-            name="photo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Foto para reconhecimento</FormLabel>
-                <FormControl>
-                  <Input
-                    type={'file'}
-                    placeholder="Insira o email do usuário"
-                    {...fileRef}
-                    onChange={(event) => {
-                      field.onChange(event.target?.files?.[0] ?? undefined)
-                    }}
-                  />
-                </FormControl>
-
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="askUser"
-            render={({ field }) => (
-              <div className="items-top flex space-x-2">
-                <Checkbox
-                  id="askUser"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-                <div className="grid gap-1.5 leading-none">
-                  <label
-                    htmlFor="askUser"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Solicitar foto ao usuário por email
-                  </label>
-                </div>
-              </div>
-            )}
-          />
-        </div>
-
         <FormField
           control={form.control}
-          name="groups"
+          name="photo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Grupos</FormLabel>
+              <FormLabel required>Foto para reconhecimento</FormLabel>
               <FormControl>
-                <MultiSelect
-                  options={userGroupOptions}
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  placeholder="Selecione os grupos"
-                  variant="inverted"
-                  maxCount={2}
+                <Input
+                  type={'file'}
+                  {...fileRef}
+                  onChange={(event) => {
+                    field.onChange(event.target?.files ?? undefined)
+                  }}
                 />
               </FormControl>
-              <FormDescription>
-                Escolha os grupos a qual o usuário pertence
-              </FormDescription>
+
               <FormMessage />
             </FormItem>
           )}
@@ -251,14 +257,17 @@ export function UserForm({
 
         <FormField
           control={form.control}
-          name="environments"
+          name="environmentIds"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Ambientes</FormLabel>
               <FormControl>
                 <MultiSelect
-                  options={environmentGroupOptions.concat(environmentOptions)}
-                  onValueChange={field.onChange}
+                  options={environmentOptions}
+                  onValueChange={(val) => {
+                    console.log('value changed', val)
+                    field.onChange(val)
+                  }}
                   defaultValue={field.value}
                   placeholder="Selecione os ambientes"
                   variant="inverted"
@@ -275,10 +284,14 @@ export function UserForm({
 
         {footerSlot || (
           <div className="col-span-full ml-auto mt-4 flex justify-end">
-            <Button variant={'outline'} type="button">
+            <Link
+              href={'/users'}
+              className={buttonVariants({ variant: 'outline' })}
+            >
               Cancelar
-            </Button>
-            <Button className="ml-2" type="submit">
+            </Link>
+
+            <Button loading={isPending} className="ml-2" type="submit">
               Adicionar
             </Button>
           </div>

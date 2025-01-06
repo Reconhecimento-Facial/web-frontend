@@ -18,3 +18,23 @@ export const cpfMask: MaskitoOptions = {
     /\d/,
   ],
 }
+
+export const phoneNumberMask: MaskitoOptions = {
+  mask: [
+    '(',
+    /\d/,
+    /\d/,
+    ')',
+    ' ',
+    /\d/,
+    /\d/,
+    /\d/,
+    /\d/,
+    /\d/,
+    '-',
+    /\d/,
+    /\d/,
+    /\d/,
+    /\d/,
+  ],
+}
