@@ -1,76 +1,57 @@
+'use client'
+
 import { NextPage } from 'next'
 import { EnvironmentsTable } from './_components/environments-table'
-import { searchParamsCache } from './searchParams'
 
-import { fakeEnvironments } from '@/lib/data'
-import { Environment } from './columns'
+import { useSorting } from '@/hooks/use-sorting'
+import { usePagination } from '@/hooks/use-pagination'
+import { useFilter } from '@/hooks/use-filters'
+import { useEnvironments } from '@/hooks/data/use-environments'
 
-const UsersPage: NextPage<{
-  searchParams: { [key: string]: string | string[] | undefined }
-}> = ({ searchParams }) => {
-  const { pageIndex, pageSize, sortKey, sortDesc, filters } =
-    searchParamsCache.parse(searchParams)
+const EnvironmentsPage: NextPage = () => {
+  const [sorting, setSorting] = useSorting()
+  const [pagination, setPagination] = usePagination()
+  const [filters, setFilters] = useFilter()
 
-  let environments = sortKey
-    ? fakeEnvironments.toSorted((a, b) =>
-        sortEnvironmentsByName(a, b, sortDesc),
-      )
-    : fakeEnvironments
-
-  let nameFilter = ''
-  let groupsFilter: string[] = []
-
-  filters.forEach((f) => {
-    switch (f.id) {
-      case 'name':
-        nameFilter = f.value as string
-        break
-      case 'groups':
-        groupsFilter = f.value as string[]
-        break
-      default:
-        break
-    }
-  })
-
-  const hasFilters = nameFilter || groupsFilter.length
-
-  if (hasFilters)
-    environments = environments.filter((e) => {
-      if (
-        nameFilter &&
-        !e.name.toLowerCase().includes(nameFilter.toLowerCase())
-      )
-        return false
-
-      if (
-        groupsFilter.length &&
-        !e.groups.some((g) => groupsFilter.includes(g.value))
-      )
-        return false
-
-      return true
-    })
-
-  const totalCount = environments.length
-
-  environments = environments.slice(
-    pageIndex * pageSize,
-    (pageIndex + 1) * pageSize,
-  )
+  const { data, isPending } = useEnvironments(pagination, sorting, filters)
 
   return (
     <div className="p-6">
       <h2 className="mb-4 scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
         Ambientes
       </h2>
-      <EnvironmentsTable environments={environments} totalCount={totalCount} />
+      <EnvironmentsTable
+        isPending={isPending}
+        environments={data?.items || []}
+        totalCount={data?.total || 0}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        sorting={[sorting]}
+        onSortingChange={(updater) => {
+          const newSortingValue =
+            updater instanceof Function
+              ? updater([
+                  {
+                    desc: sorting.desc,
+                    id: sorting.id,
+                  },
+                ])
+              : updater
+
+          if (!newSortingValue[0]) setSorting({ id: '', desc: false })
+          else
+            setSorting({
+              desc: newSortingValue[0].desc,
+              id: newSortingValue[0].id,
+            })
+
+          setPagination({ pageIndex: 0 })
+        }}
+        filters={filters}
+        onColumnFiltersChange={setFilters}
+      />
     </div>
   )
 }
 
-function sortEnvironmentsByName(a: Environment, b: Environment, desc: boolean) {
-  return desc ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name)
-}
-
-export default UsersPage
+export default EnvironmentsPage

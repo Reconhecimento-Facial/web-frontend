@@ -9,9 +9,7 @@ import { usePagination } from '@/hooks/use-pagination'
 import { useFilter } from '@/hooks/use-filters'
 import { useUsers } from '@/hooks/data/use-users'
 
-const UsersPage: NextPage<{
-  searchParams: { [key: string]: string | string[] | undefined }
-}> = () => {
+const UsersPage: NextPage = () => {
   const [sorting, setSorting] = useSorting()
   const [pagination, setPagination] = usePagination()
   const [filters, setFilters] = useFilter()

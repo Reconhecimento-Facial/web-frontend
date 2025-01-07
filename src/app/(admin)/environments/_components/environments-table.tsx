@@ -1,79 +1,64 @@
 'use client'
 
 import { ChangeEvent, ComponentType } from 'react'
-import { columns, Environment } from '../columns'
-import { useSorting } from '@/hooks/use-sorting'
-import { usePagination } from '@/hooks/use-pagination'
-import { useFilter } from '@/hooks/use-filters'
+import { columns } from '../columns'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { useDebouncedCallback } from 'use-debounce'
-import { Table } from '@tanstack/react-table'
-import { DataTableFilter } from '@/components/ui/data-table-filter'
-import { environmentGroupOptions } from '@/lib/data'
+import {
+  ColumnFiltersState,
+  OnChangeFn,
+  PaginationState,
+  SortingState,
+  Table,
+} from '@tanstack/react-table'
 import { buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
+import { Environment } from '@/models/environment'
 
 type EnvironmentsTableProps = {
+  onSortingChange: OnChangeFn<SortingState>
+  onPaginationChange: OnChangeFn<PaginationState>
+  onColumnFiltersChange: OnChangeFn<ColumnFiltersState>
   environments: Environment[]
   totalCount: number
+  sorting: SortingState
+  pagination: PaginationState
+  filters: ColumnFiltersState
+  isPending?: boolean
 }
 
 export const EnvironmentsTable: ComponentType<EnvironmentsTableProps> = ({
   environments,
+  onPaginationChange,
+  onSortingChange,
+  onColumnFiltersChange,
   totalCount,
+  sorting,
+  pagination,
+  filters,
+  isPending,
 }) => {
-  const [sorting, setSorting] = useSorting()
-  const [pagination, setPagination] = usePagination()
-  const [filters, setFilters] = useFilter()
-
   return (
     <div>
       <DataTable
         columns={columns}
         data={environments}
-        getRowId={(originalRow) => originalRow.id}
+        getRowId={(originalRow, index) => {
+          return originalRow.id ? originalRow.id.toString() : index.toString()
+        }}
         pagination
         Toolbar={DataTableToolbar}
-        onPaginationChange={setPagination}
-        onSortingChange={(updater) => {
-          const newSortingValue =
-            updater instanceof Function
-              ? updater([
-                  {
-                    desc: sorting.desc,
-                    id: sorting.id,
-                  },
-                ])
-              : updater
-
-          if (!newSortingValue[0]) setSorting({ id: '', desc: false })
-          else
-            setSorting({
-              desc: newSortingValue[0].desc,
-              id: newSortingValue[0].id,
-            })
-
-          setPagination({ pageIndex: 0 })
-        }}
-        onColumnFiltersChange={(updater) => {
-          const newColumnFiltersValue =
-            updater instanceof Function ? updater(filters) : updater
-
-          setFilters(newColumnFiltersValue)
-          setPagination({ pageIndex: 0 })
-        }}
+        onPaginationChange={onPaginationChange}
+        onSortingChange={onSortingChange}
+        onColumnFiltersChange={onColumnFiltersChange}
         manualPagination
         manualSorting
         manualFiltering
         rowCount={totalCount}
+        isPending={isPending}
         state={{
-          sorting: [
-            {
-              desc: sorting.desc,
-              id: sorting.id,
-            },
-          ],
+          sorting,
           pagination,
           columnFilters: filters,
         }}
@@ -96,8 +81,6 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
     500,
   )
 
-  const groupsColumn = table.getColumn('groups')
-
   return (
     <div className="mb-6 flex flex-wrap items-stretch justify-between gap-4">
       <div className="flex flex-wrap items-stretch gap-4 md:min-w-[700px]">
@@ -107,14 +90,6 @@ function DataTableToolbar({ table }: DataTableToolbarProps) {
           onChange={handleSearch}
           placeholder="Buscar ambiente"
         />
-
-        {groupsColumn && (
-          <DataTableFilter
-            column={groupsColumn}
-            title="Grupos"
-            options={environmentGroupOptions}
-          />
-        )}
       </div>
       <div>
         <Link href={'/environments/add'} className={buttonVariants()}>
