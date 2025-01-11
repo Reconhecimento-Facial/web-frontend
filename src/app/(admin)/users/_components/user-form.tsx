@@ -93,13 +93,11 @@ export function UserForm({
     [data],
   )
   const onSubmit = async (values: UserInputs) => {
-    console.log('submitted')
     try {
       await mutateAsync(values)
       form.reset()
       toast({ variant: 'default', description: 'Usuário criado com sucesso!' })
     } catch {
-      console.log('user sdasdasd')
       toast({
         variant: 'destructive',
         title: 'Ops! Algo de errado ocorreu.',

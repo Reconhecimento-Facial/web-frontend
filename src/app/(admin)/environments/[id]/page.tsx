@@ -1,9 +1,12 @@
-import { fakeEnvironments } from '@/lib/data'
 import dayjs from '@/lib/dayjs'
 import { NextPage } from 'next'
 import Image from 'next/image'
 import { EnvironmentPanels } from './_components/environment-panels'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { auth } from '@/auth'
+import { Environment } from '@/models/environment'
+import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 interface EnvironmentPageProps {
   params: {
@@ -11,12 +14,32 @@ interface EnvironmentPageProps {
   }
 }
 
-const EnvironmentPage: NextPage<EnvironmentPageProps> = ({ params }) => {
+export const DEFAULT_ENVIRONMENT_IMAGE_URL = '/assets/environment-image.png'
+
+const EnvironmentPage: NextPage<EnvironmentPageProps> = async ({ params }) => {
   const { id: environmentId } = params
 
-  const environment = fakeEnvironments.find((e) => e.id === environmentId)
+  const session = await auth()
+
+  if (!session?.user) return null
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/environments/${environmentId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    },
+  )
+
+  if (!response.ok) return null
+
+  const environment = (await response.json()) as Environment
 
   if (!environment) return <div>Ambiente não encontrado</div>
+
+  const image = environment.photo_url || DEFAULT_ENVIRONMENT_IMAGE_URL
 
   return (
     <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-2">
@@ -28,23 +51,23 @@ const EnvironmentPage: NextPage<EnvironmentPageProps> = ({ params }) => {
           className="mt-4"
           width={345}
           height={170}
-          src={'/assets/environment-image.png'}
+          src={image}
           alt="Imagem do ambiente"
         />
         <div className="mt-4 space-y-4">
           <GridItem label="Dispositivo" value={'teste'} />
-          <GridItem
-            label="Grupos"
-            value={environment.groups.map((g) => g.label).join(', ')}
-          />
+
           <GridItem
             label="Cadastrado em"
             value={dayjs(environment.created_at).format('DD/MM/YYYY')}
           />
         </div>
-        <Button className="mt-4" variant={'outline'}>
+        <Link
+          href={`/environments/${environment.id}/edit`}
+          className={cn(buttonVariants({ variant: 'outline' }), 'mt-4')}
+        >
           Editar
-        </Button>
+        </Link>
       </div>
 
       <div className="">

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 'use client'
 import { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
@@ -14,6 +15,10 @@ import {
 import { useRouter } from 'next/navigation'
 
 import { Environment } from '@/models/environment'
+import Link from 'next/link'
+import { useDeleteEnvironment } from '@/hooks/data/use-delete-environment'
+import { useToast } from '@/hooks/use-toast'
+import { useCallback } from 'react'
 
 export const columns: ColumnDef<Environment>[] = [
   {
@@ -34,7 +39,26 @@ export const columns: ColumnDef<Environment>[] = [
     id: 'actions',
     cell: ({ row }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { toast } = useToast()
       const { push } = useRouter()
+
+      const onSuccess = useCallback(() => {
+        toast({
+          variant: 'default',
+          description: 'Ambiente excluído com sucesso!',
+        })
+        push('/environments')
+      }, [toast, push])
+
+      const onError = useCallback(() => {
+        toast({
+          variant: 'destructive',
+          title: 'Ops! Algo de errado ocorreu.',
+          description: 'Por favor, tente novamente mais tarde.',
+        })
+      }, [toast])
+
+      const { mutate } = useDeleteEnvironment(onSuccess, onError)
 
       return (
         <DropdownMenu>
@@ -51,8 +75,13 @@ export const columns: ColumnDef<Environment>[] = [
               Ver Perfil
             </DropdownMenuItem>
 
-            <DropdownMenuItem>Editar</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem>
+              <Link href={`/environments/${row.original.id}/edit`}>Editar</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => mutate(row.original.id)}
+              className="text-destructive"
+            >
               Excluir
             </DropdownMenuItem>
           </DropdownMenuContent>

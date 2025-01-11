@@ -9,7 +9,6 @@ export function useCreateUser() {
   const { data: sessionData } = useSession()
 
   return useMutation({
-    mutationKey: ['users'],
     mutationFn: async (formData: UserInputs) => {
       if (!sessionData) throw new Error('You are not authorized')
 
@@ -42,10 +41,8 @@ export function useCreateUser() {
       })
 
       if (!response.ok) {
-        throw new Error('An error ocurred')
+        throw new Error('An error occurred')
       }
-
-      console.log('response', response)
 
       const data = (await response.json()) as {
         message: string
@@ -53,9 +50,6 @@ export function useCreateUser() {
       }
 
       return data
-    },
-    onError(error, data) {
-      console.log('error', error, data)
     },
   })
 }
