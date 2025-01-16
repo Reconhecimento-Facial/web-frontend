@@ -2,6 +2,8 @@ import NextAuth, { CredentialsSignin } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { ServerError } from './app/api/_errors/ServerError'
 import { InvalidCredentials } from './app/api/_errors/InvalidCredentials'
+import { getIsTokenValid } from './lib/jwt'
+import { NextResponse } from 'next/server'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -70,6 +72,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    authorized({ auth, request: req }) {
+      const isTokenValid = getIsTokenValid(auth?.access_token || '')
+
+      if (isTokenValid) return true
+
+      const nonProtectedRoutes = ['/login', '/account-recovery']
+
+      if (!auth && !nonProtectedRoutes.includes(req.nextUrl.pathname)) {
+        const newUrl = new URL('/login', req.nextUrl.origin)
+        return NextResponse.redirect(newUrl)
+      }
+
+      if (!isTokenValid) {
+        return false
+      }
+    },
     /*
       This callback is called whenever a JSON Web Token is created (i.e. at sign in) or updated (i.e whenever a session is accessed in the client)
       token: When event is "signIn" or "signUp", it will be a subset of JWT, Otherwise, it will be the full JWT
@@ -90,6 +108,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       This callback is called whenever a session is checked. (i.e. when invoking the /api/session endpoint, using useSession or getSession)
     */
     session({ session, token }) {
+      const isTokenValid = getIsTokenValid((token.access_token as string) || '')
+
+      if (!isTokenValid) return { user: undefined, expires: '' }
+
       return {
         ...session,
         access_token: token.access_token,
