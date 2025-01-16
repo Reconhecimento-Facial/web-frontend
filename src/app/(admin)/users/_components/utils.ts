@@ -2,6 +2,8 @@ import { validateCPF, validatePhoto } from '@/lib/validate'
 import { subYears } from 'date-fns'
 import { z } from 'zod'
 
+export const DEFAULT_USER_IMAGE_URL = '/assets/user-image.png'
+
 export const userFormSchema = z.object({
   name: z
     .string({ required_error: 'Campo obrigatório' })
@@ -10,6 +12,7 @@ export const userFormSchema = z.object({
   cpf: z
     .string({ required_error: 'Campo obrigatório' })
     .refine((value) => validateCPF(value), { message: 'CPF inválido' }),
+  status: z.enum(['active', 'inactive']).optional(),
   email: z
     .string({
       required_error: 'Campo obrigatório',

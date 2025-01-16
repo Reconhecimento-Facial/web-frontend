@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { cn } from '@/lib/utils'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { environmentFormSchema } from './utils'
 import { z } from 'zod'
 
@@ -27,6 +27,7 @@ import { useCreateEnvironment } from '@/hooks/data/use-create-environment'
 import Image from 'next/image'
 import { DEFAULT_ENVIRONMENT_IMAGE_URL } from '../[id]/page'
 import { useEditEnvironment } from '@/hooks/data/use-edit-environment'
+import { getDirtyValues } from '@/lib/form'
 
 export type EnvironmentInputs = z.infer<typeof environmentFormSchema>
 
@@ -59,9 +60,17 @@ export function EnvironmentForm({
     environment?.photo || DEFAULT_ENVIRONMENT_IMAGE_URL,
   )
 
-  const { mutateAsync: createEnvironmentAsync, isPending } =
-    useCreateEnvironment()
-  const { mutateAsync: editEnvironmentAsync } = useEditEnvironment()
+  const {
+    mutateAsync: createEnvironmentAsync,
+    isPending: isPendingCreateUser,
+  } = useCreateEnvironment()
+  const { mutateAsync: editEnvironmentAsync, isPending: isPendingEditUser } =
+    useEditEnvironment()
+
+  const isPending = useMemo(
+    () => isPendingCreateUser || isPendingEditUser,
+    [isPendingCreateUser, isPendingEditUser],
+  )
 
   const onSubmit = async (values: EnvironmentInputs) => {
     try {
@@ -74,12 +83,15 @@ export function EnvironmentForm({
         form.reset()
         setImagePreview(DEFAULT_ENVIRONMENT_IMAGE_URL)
       } else {
-        if (!form.formState.dirtyFields.photo) values.photo = ''
-        await editEnvironmentAsync({ ...values, id: environment.id })
+        const dirtyValues = getDirtyValues(form.formState.dirtyFields, values)
+
+        await editEnvironmentAsync({ ...dirtyValues, id: environment.id })
+
         toast({
           variant: 'default',
           description: 'Ambiente alterado com sucesso!',
         })
+
         form.reset(form.getValues())
       }
     } catch {

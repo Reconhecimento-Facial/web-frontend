@@ -19,6 +19,7 @@ import Link from 'next/link'
 import { useDeleteEnvironment } from '@/hooks/data/use-delete-environment'
 import { useToast } from '@/hooks/use-toast'
 import { useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 
 export const columns: ColumnDef<Environment>[] = [
   {
@@ -38,7 +39,7 @@ export const columns: ColumnDef<Environment>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const queryClient = useQueryClient()
       const { toast } = useToast()
       const { push } = useRouter()
 
@@ -47,8 +48,9 @@ export const columns: ColumnDef<Environment>[] = [
           variant: 'default',
           description: 'Ambiente excluído com sucesso!',
         })
-        push('/environments')
-      }, [toast, push])
+
+        queryClient.invalidateQueries({ queryKey: ['environments'] })
+      }, [toast, queryClient])
 
       const onError = useCallback(() => {
         toast({

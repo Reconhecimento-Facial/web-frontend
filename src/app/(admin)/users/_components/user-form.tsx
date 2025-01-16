@@ -21,8 +21,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { cn } from '@/lib/utils'
 import { MultiSelect } from '@/components/ui/multi-select'
-import React from 'react'
-import { userFormSchema } from './utils'
+import React, { useMemo, useState } from 'react'
+import { DEFAULT_USER_IMAGE_URL, userFormSchema } from './utils'
 import { z } from 'zod'
 
 import { cpfMask, phoneNumberMask } from '@/components/input-config'
@@ -40,6 +40,16 @@ import { format, startOfDay, subYears } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
+import Image from 'next/image'
+import { useEditUser } from '@/hooks/data/use-edit-user'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { getDirtyValues } from '@/lib/form'
 
 export type UserInputs = z.infer<typeof userFormSchema>
 
@@ -47,6 +57,7 @@ const defaultValues: Omit<UserInputs, 'photo'> = {
   cpf: '',
   name: '',
   email: '',
+  status: 'active',
   environmentIds: [],
   dateOfBirth: new Date(),
   phoneNumber: '',
@@ -54,31 +65,39 @@ const defaultValues: Omit<UserInputs, 'photo'> = {
 
 type UserFormProps = {
   className?: string
-  initialValues?: Partial<UserInputs>
+  user?: UserInputs & { id: number }
   footerSlot?: React.ReactNode
 }
 
-export function UserForm({
-  className,
-  initialValues,
-  footerSlot,
-}: UserFormProps) {
+export function UserForm({ className, user, footerSlot }: UserFormProps) {
   const { toast } = useToast()
   const form = useForm<UserInputs>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       ...defaultValues,
-      ...initialValues,
-      cpf: maskitoTransform(initialValues?.cpf || '', cpfMask),
-      phoneNumber: maskitoTransform(
-        initialValues?.phoneNumber || '',
-        phoneNumberMask,
-      ),
+      ...user,
+      cpf: maskitoTransform(user?.cpf || '', cpfMask),
+      phoneNumber: maskitoTransform(user?.phoneNumber || '', phoneNumberMask),
     },
     reValidateMode: 'onChange',
   })
+
+  const [imagePreview, setImagePreview] = useState(
+    user?.photo || DEFAULT_USER_IMAGE_URL,
+  )
+
   const { data } = useInfiniteEnvironments()
-  const { mutateAsync, isPending } = useCreateUser()
+
+  const { mutateAsync: createUserAsync, isPending: isPendingCreateUser } =
+    useCreateUser()
+
+  const { mutateAsync: editUserAsync, isPending: isPendingEditUser } =
+    useEditUser()
+
+  const isPending = useMemo(
+    () => isPendingCreateUser || isPendingEditUser,
+    [isPendingCreateUser, isPendingEditUser],
+  )
 
   const environmentOptions: { value: string; label: string }[] = React.useMemo(
     () =>
@@ -92,12 +111,33 @@ export function UserForm({
         : [],
     [data],
   )
+
   const onSubmit = async (values: UserInputs) => {
     try {
-      await mutateAsync(values)
-      form.reset()
-      toast({ variant: 'default', description: 'Usuário criado com sucesso!' })
-    } catch {
+      if (!user) {
+        await createUserAsync(values)
+
+        form.reset()
+
+        toast({
+          variant: 'default',
+          description: 'Usuário criado com sucesso!',
+        })
+
+        setImagePreview(DEFAULT_USER_IMAGE_URL)
+      } else {
+        const dirtyValues = getDirtyValues(form.formState.dirtyFields, values)
+
+        await editUserAsync({ ...dirtyValues, id: user.id })
+
+        toast({
+          variant: 'default',
+          description: 'Usuário alterado com sucesso!',
+        })
+
+        form.reset(form.getValues())
+      }
+    } catch (e) {
       toast({
         variant: 'destructive',
         title: 'Ops! Algo de errado ocorreu.',
@@ -114,172 +154,228 @@ export function UserForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('grid grid-cols-3 gap-4', className)}
+        className={cn('grid grid-cols-[auto_1fr] gap-4', className)}
       >
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>Nome</FormLabel>
-              <FormControl>
-                <Input placeholder="Insira o nome do usuário" {...field} />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="Insira o email do usuário" {...field} />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="cpf"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>CPF</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Insira o CPF do usuário"
-                  {...field}
-                  ref={cpfInputRef}
-                  onInput={(evt) => {
-                    form.setValue('cpf', evt.currentTarget.value, {
-                      shouldValidate: form.formState.isSubmitted,
-                    })
-                  }}
+        <div className="w-fit justify-self-start">
+          <FormField
+            control={form.control}
+            name="photo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor="photo" required>
+                  Foto para reconhecimento
+                </FormLabel>
+                <Image
+                  className="mt-4"
+                  width={345}
+                  height={170}
+                  src={imagePreview}
+                  alt="Imagem do ambiente"
                 />
-              </FormControl>
+                <FormLabel
+                  htmlFor="photo"
+                  className="cursor-pointer text-sm font-medium underline underline-offset-4 hover:text-primary"
+                >
+                  {field.value ? 'Alterar foto' : 'Adicionar foto'}
+                </FormLabel>
 
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="phoneNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>Nº de celular</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Insira o Nº de celular do usuário"
-                  {...field}
-                  ref={phoneNumberInputRef}
-                  onInput={(evt) => {
-                    form.setValue('phoneNumber', evt.currentTarget.value, {
-                      shouldValidate: form.formState.isSubmitted,
-                    })
-                  }}
-                />
-              </FormControl>
+                <FormControl>
+                  <Input
+                    id="photo"
+                    type={'file'}
+                    {...fileRef}
+                    className="hidden"
+                    onChange={(event) => {
+                      field.onChange(event.target?.files ?? undefined)
 
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                      const file = event.target.files?.[0]
 
-        <FormField
-          control={form.control}
-          name="dateOfBirth"
-          render={({ field }) => (
-            <FormItem className="flex w-full flex-col">
-              <FormLabel required>Data de nascimento</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={'outline'}
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !field.value && 'text-muted-foreground',
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {field.value ? (
-                      format(field.value, 'PPP', { locale: ptBR })
-                    ) : (
-                      <span>Selecione uma data</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    autoFocus
-                    startMonth={startOfDay(subYears(new Date(), 150))}
-                    endMonth={startOfDay(new Date())}
-                    locale={ptBR}
+                      if (file) {
+                        const reader = new FileReader()
+                        reader.onloadend = () => {
+                          setImagePreview(reader.result as string)
+                        }
+                        reader.readAsDataURL(file)
+                      }
+                    }}
                   />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          {user && (
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Ativado</SelectItem>
+                      <SelectItem value="inactive">Desativado</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
-        />
 
-        <FormField
-          control={form.control}
-          name="photo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>Foto para reconhecimento</FormLabel>
-              <FormControl>
-                <Input
-                  type={'file'}
-                  {...fileRef}
-                  onChange={(event) => {
-                    field.onChange(event.target?.files ?? undefined)
-                  }}
-                />
-              </FormControl>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Nome</FormLabel>
+                <FormControl>
+                  <Input placeholder="Insira o nome do usuário" {...field} />
+                </FormControl>
 
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="environmentIds"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ambientes</FormLabel>
-              <FormControl>
-                <MultiSelect
-                  options={environmentOptions}
-                  onValueChange={(val) => {
-                    console.log('value changed', val)
-                    field.onChange(val)
-                  }}
-                  defaultValue={field.value}
-                  placeholder="Selecione os ambientes"
-                  variant="inverted"
-                  maxCount={2}
-                />
-              </FormControl>
-              <FormDescription>
-                Escolha os ambientes que o usuário tem acesso
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="Insira o email do usuário" {...field} />
+                </FormControl>
 
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="cpf"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>CPF</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Insira o CPF do usuário"
+                    {...field}
+                    ref={cpfInputRef}
+                    onInput={(evt) => {
+                      form.setValue('cpf', evt.currentTarget.value, {
+                        shouldValidate: form.formState.isSubmitted,
+                      })
+                    }}
+                  />
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Nº de celular</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Insira o Nº de celular do usuário"
+                    {...field}
+                    ref={phoneNumberInputRef}
+                    onInput={(evt) => {
+                      form.setValue('phoneNumber', evt.currentTarget.value, {
+                        shouldValidate: form.formState.isSubmitted,
+                      })
+                    }}
+                  />
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="dateOfBirth"
+            render={({ field }) => (
+              <FormItem className="flex w-full flex-col">
+                <FormLabel required>Data de nascimento</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !field.value && 'text-muted-foreground',
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? (
+                        format(field.value, 'PPP', { locale: ptBR })
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      autoFocus
+                      startMonth={startOfDay(subYears(new Date(), 150))}
+                      endMonth={startOfDay(new Date())}
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="environmentIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ambientes</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={environmentOptions}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    placeholder="Selecione os ambientes"
+                    variant="inverted"
+                    maxCount={2}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Escolha os ambientes que o usuário tem acesso
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         {footerSlot || (
           <div className="col-span-full ml-auto mt-4 flex justify-end">
             <Link

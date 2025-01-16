@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-import { Group, DoorClosed, Users, Headset } from 'lucide-react'
+import { DoorClosed, Users, Headset } from 'lucide-react'
 import Link from 'next/link'
 
 const items = [
@@ -25,14 +25,7 @@ const items = [
     url: '/environments',
     icon: DoorClosed,
   },
-  {
-    title: 'Grupos',
-    url: '#',
-    icon: Group,
-  },
 ]
-
-// Adicionar suporte na sidebar
 
 export function AppSidebar() {
   return (

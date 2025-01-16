@@ -8,14 +8,16 @@ export function useEditEnvironment() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (formData: EnvironmentInputs & { id: number }) => {
+    mutationFn: async (
+      formData: Partial<EnvironmentInputs> & { id: number },
+    ) => {
       if (!sessionData) throw new Error('You are not authorized')
 
       const body = new FormData()
 
-      body.set('name', formData.name)
+      body.set('name', formData.name || '')
 
-      if ((formData.photo as FileList).length) {
+      if (formData.photo && (formData.photo as FileList).length) {
         body.set('photo', formData.photo[0])
       } else {
         body.set('photo', '')

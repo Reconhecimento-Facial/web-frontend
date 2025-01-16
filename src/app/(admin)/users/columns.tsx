@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
@@ -16,6 +17,11 @@ import { Badge } from '@/components/ui/badge'
 
 import Link from 'next/link'
 import { User } from '@/models/user'
+import { useCallback } from 'react'
+
+import { useToast } from '@/hooks/use-toast'
+import { useDeleteUser } from '@/hooks/data/use-delete-user'
+import { useQueryClient } from '@tanstack/react-query'
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -53,6 +59,28 @@ export const columns: ColumnDef<User>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
+      const queryClient = useQueryClient()
+      const { toast } = useToast()
+
+      const onSuccess = useCallback(() => {
+        toast({
+          variant: 'default',
+          description: 'Usuário excluído com sucesso!',
+        })
+
+        queryClient.invalidateQueries({ queryKey: ['users'] })
+      }, [toast, queryClient])
+
+      const onError = useCallback(() => {
+        toast({
+          variant: 'destructive',
+          title: 'Ops! Algo de errado ocorreu.',
+          description: 'Por favor, tente novamente mais tarde.',
+        })
+      }, [toast])
+
+      const { mutate } = useDeleteUser(onSuccess, onError)
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -73,7 +101,10 @@ export const columns: ColumnDef<User>[] = [
                 Editar
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem
+              onClick={() => mutate(row.original.id)}
+              className="text-destructive"
+            >
               Excluir
             </DropdownMenuItem>
           </DropdownMenuContent>

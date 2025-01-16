@@ -7,6 +7,7 @@ export type User = {
   date_of_birth: string
   cpf: string
   phone_number: string
+  photo_url: string
   status: UserStatus
 }
 
