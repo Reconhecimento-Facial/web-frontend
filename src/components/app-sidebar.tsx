@@ -54,7 +54,12 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <a href={'#'}>
+              <a
+                target="_blank"
+                href={
+                  'https://docs.google.com/forms/d/e/1FAIpQLScqCUCc1AS4l4xb_MrJ4HbEz3JQvdi7nFnQu-ByRJlMw28S8Q/viewform?usp=sharing'
+                }
+              >
                 <Headset /> <span>Suporte</span>
               </a>
             </SidebarMenuButton>
