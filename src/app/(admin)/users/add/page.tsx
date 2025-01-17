@@ -1,4 +1,9 @@
+import { Metadata } from 'next'
 import { UserForm } from '../_components/user-form'
+
+export const metadata: Metadata = {
+  title: 'Adicionar Usuário',
+}
 
 export default function AddPage() {
   return (

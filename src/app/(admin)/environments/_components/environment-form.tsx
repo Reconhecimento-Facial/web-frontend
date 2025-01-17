@@ -18,14 +18,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { cn } from '@/lib/utils'
 import React, { useMemo, useState } from 'react'
-import { environmentFormSchema } from './utils'
+import { DEFAULT_ENVIRONMENT_IMAGE_URL, environmentFormSchema } from './utils'
 import { z } from 'zod'
 
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import { useCreateEnvironment } from '@/hooks/data/use-create-environment'
 import Image from 'next/image'
-import { DEFAULT_ENVIRONMENT_IMAGE_URL } from '../[id]/page'
+
 import { useEditEnvironment } from '@/hooks/data/use-edit-environment'
 import { getDirtyValues } from '@/lib/form'
 

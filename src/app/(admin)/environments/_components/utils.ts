@@ -1,6 +1,8 @@
 import { validatePhoto } from '@/lib/validate'
 import { z } from 'zod'
 
+export const DEFAULT_ENVIRONMENT_IMAGE_URL = '/assets/environment-image.png'
+
 export const environmentFormSchema = z.object({
   name: z.string({}),
   photo: z

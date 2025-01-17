@@ -4,23 +4,38 @@ import { FooterEditForm } from './_components/footer-edit-form'
 import { User } from '@/models/user'
 import { Pagination } from '@/models/utils'
 import { Environment } from '@/models/environment'
+import { fetchUser } from '@/hooks/data/fetch-user'
+import { Metadata } from 'next'
 
-export default async function EditPage({ params }: { params: { id: string } }) {
+type Props = {
+  params: { id: string }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const session = await auth()
+  const userId = params.id
+
+  if (!session?.access_token) return { title: 'Erro inesperado' }
+
+  const response = await fetchUser(Number(userId), session?.access_token)
+
+  if (!response.ok) return { title: 'Usuário não encontrado' }
+
+  const user = (await response.json()) as User
+
+  return {
+    title: `Edição - ${user.name}`,
+  }
+}
+
+export default async function EditPage({ params }: Props) {
   const { id: userId } = params
 
   const session = await auth()
 
   if (!session?.user) return null
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`,
-    {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    },
-  )
+  const response = await fetchUser(Number(userId), session.access_token)
 
   if (!response.ok) return null
 

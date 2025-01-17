@@ -2,9 +2,38 @@ import { Environment } from '@/models/environment'
 import { EnvironmentForm } from '../../_components/environment-form'
 import { FooterEditForm } from './_components/footer-edit-form'
 import { auth } from '@/auth'
-import { DEFAULT_ENVIRONMENT_IMAGE_URL } from '../page'
 
-export default async function EditPage({ params }: { params: { id: string } }) {
+import { fetchEnvironment } from '@/hooks/data/fetch-environment'
+import { Metadata } from 'next'
+import { DEFAULT_ENVIRONMENT_IMAGE_URL } from '../../_components/utils'
+
+type Props = {
+  params: {
+    id: string
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const session = await auth()
+  const environmentId = params.id
+
+  if (!session?.access_token) return { title: 'Erro inesperado' }
+
+  const response = await fetchEnvironment(
+    Number(environmentId),
+    session?.access_token,
+  )
+
+  if (!response.ok) return { title: 'Ambiente não encontrado' }
+
+  const environment = (await response.json()) as Environment
+
+  return {
+    title: `Edição - ${environment.name}`,
+  }
+}
+
+export default async function EditPage({ params }: Props) {
   const session = await auth()
 
   if (!session?.user) return null

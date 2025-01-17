@@ -15,27 +15,38 @@ import { User as UserType } from '@/models/user'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
+import { fetchUser } from '@/hooks/data/fetch-user'
+import { Metadata } from 'next'
 
-export default async function UserProfilePage({
-  params,
-}: {
+type Props = {
   params: { id: string }
-}) {
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const session = await auth()
+  const userId = params.id
+
+  if (!session?.access_token) return { title: 'Erro inesperado' }
+
+  const response = await fetchUser(Number(userId), session?.access_token)
+
+  if (!response.ok) return { title: 'Usuário não encontrado' }
+
+  const user = (await response.json()) as UserType
+
+  return {
+    title: user.name,
+  }
+}
+
+export default async function UserProfilePage({ params }: Props) {
   const { id: userId } = params
 
   const session = await auth()
 
   if (!session?.user) return null
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`,
-    {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    },
-  )
+  const response = await fetchUser(Number(userId), session.access_token)
 
   if (!response.ok) return null
 

@@ -5,7 +5,6 @@ import { HistoryPanel } from './history-panel'
 import { AllowedUsersPanel } from './allowed-users-panel'
 import { parseAsInteger, useQueryState } from 'nuqs'
 import { Pagination } from '@/components/ui/pagination'
-import { useEnvironmentHistory } from '@/hooks/use-environment-history'
 import { useAllowedUsers } from '@/hooks/use-allowed-users'
 
 export function EnvironmentPanels({
@@ -20,12 +19,6 @@ export function EnvironmentPanels({
   const [pageIndex, setPageIndex] = useQueryState(
     'page',
     parseAsInteger.withDefault(0),
-  )
-
-  const { data: envHistory } = useEnvironmentHistory(
-    environmentId,
-    pageIndex,
-    activePanel === 'history',
   )
 
   const { data: allowedUsers } = useAllowedUsers(
@@ -50,7 +43,7 @@ export function EnvironmentPanels({
           <TabsTrigger value="allowed-users">Usuários Permitidos</TabsTrigger>
         </TabsList>
         <TabsContent value="history">
-          <HistoryPanel history={envHistory?.data || []} />
+          <HistoryPanel history={[]} />
         </TabsContent>
         <TabsContent value="allowed-users">
           <AllowedUsersPanel allowedUsers={allowedUsers?.data || []} />
@@ -60,7 +53,7 @@ export function EnvironmentPanels({
         className="mt-4"
         pageIndex={pageIndex}
         setPageIndex={setPageIndex}
-        totalPages={envHistory?.totalPages || 0}
+        totalPages={0}
       />
     </>
   )

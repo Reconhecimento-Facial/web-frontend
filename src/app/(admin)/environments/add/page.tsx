@@ -1,4 +1,9 @@
+import { Metadata } from 'next'
 import { EnvironmentForm } from '../_components/environment-form'
+
+export const metadata: Metadata = {
+  title: 'Adicionar Ambiente',
+}
 
 export default function AddPage() {
   return (

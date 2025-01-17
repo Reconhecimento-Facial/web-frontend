@@ -1,5 +1,5 @@
 import dayjs from '@/lib/dayjs'
-import { NextPage } from 'next'
+import { Metadata } from 'next'
 import Image from 'next/image'
 import { EnvironmentPanels } from './_components/environment-panels'
 import { buttonVariants } from '@/components/ui/button'
@@ -7,30 +7,45 @@ import { auth } from '@/auth'
 import { Environment } from '@/models/environment'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { fetchEnvironment } from '@/hooks/data/fetch-environment'
+import { DEFAULT_ENVIRONMENT_IMAGE_URL } from '../_components/utils'
 
-interface EnvironmentPageProps {
+type Props = {
   params: {
     id: string
   }
 }
 
-export const DEFAULT_ENVIRONMENT_IMAGE_URL = '/assets/environment-image.png'
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const session = await auth()
+  const environmentId = params.id
 
-const EnvironmentPage: NextPage<EnvironmentPageProps> = async ({ params }) => {
+  if (!session?.access_token) return { title: 'Erro inesperado' }
+
+  const response = await fetchEnvironment(
+    Number(environmentId),
+    session?.access_token,
+  )
+
+  if (!response.ok) return { title: 'Ambiente não encontrado' }
+
+  const environment = (await response.json()) as Environment
+
+  return {
+    title: environment.name,
+  }
+}
+
+export default async function EnvironmentPage({ params }: Props) {
   const { id: environmentId } = params
 
   const session = await auth()
 
   if (!session?.user) return null
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/environments/${environmentId}`,
-    {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    },
+  const response = await fetchEnvironment(
+    Number(environmentId),
+    session.access_token,
   )
 
   if (!response.ok) return null
@@ -85,5 +100,3 @@ function GridItem({ label, value }: { label: string; value: string }) {
     </div>
   )
 }
-
-export default EnvironmentPage
