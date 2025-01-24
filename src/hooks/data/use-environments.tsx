@@ -1,4 +1,4 @@
-import { Environment } from '@/models/environment'
+import { EnvironmentWithLastAccess } from '@/models/environment'
 import { Pagination } from '@/models/utils'
 import {
   keepPreviousData,
@@ -52,7 +52,7 @@ export function useEnvironments(
 
       const data = await response.json()
 
-      return data as Pagination<Environment>
+      return data as Pagination<EnvironmentWithLastAccess>
     },
   })
 }
@@ -66,7 +66,7 @@ export function useInfiniteEnvironments() {
       pageParam,
     }: {
       pageParam: number
-    }): Promise<Pagination<Environment> | undefined> => {
+    }): Promise<Pagination<EnvironmentWithLastAccess> | undefined> => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/environments?page=${pageParam}&size=${100}`,
         {
@@ -78,7 +78,7 @@ export function useInfiniteEnvironments() {
 
       if (res.status !== 200) return undefined
 
-      return res.json() as Promise<Pagination<Environment>>
+      return res.json() as Promise<Pagination<EnvironmentWithLastAccess>>
     },
     enabled: !!session,
     initialPageParam: 1,

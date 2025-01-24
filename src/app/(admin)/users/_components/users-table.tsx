@@ -13,13 +13,13 @@ import {
   PaginationState,
   SortingState,
 } from '@tanstack/react-table'
-import { User } from '@/models/user'
+import { UserWithLastAccess } from '@/models/user'
 
 type UsersTableProps = {
   onSortingChange: OnChangeFn<SortingState>
   onPaginationChange: OnChangeFn<PaginationState>
   onColumnFiltersChange: OnChangeFn<ColumnFiltersState>
-  users: User[]
+  users: Array<UserWithLastAccess>
   totalCount: number
   sorting: SortingState
   pagination: PaginationState

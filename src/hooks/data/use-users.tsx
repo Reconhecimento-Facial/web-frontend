@@ -1,4 +1,4 @@
-import { User } from '@/models/user'
+import { UserWithLastAccess } from '@/models/user'
 import { Pagination } from '@/models/utils'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { ColumnFilter } from '@tanstack/react-table'
@@ -49,7 +49,7 @@ export const useUsers = (
 
       const data = await response.json()
 
-      return data as Pagination<User>
+      return data as Pagination<UserWithLastAccess>
     },
   })
 }

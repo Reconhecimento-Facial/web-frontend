@@ -14,13 +14,13 @@ import {
 } from '@tanstack/react-table'
 import { buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
-import { Environment } from '@/models/environment'
+import { EnvironmentWithLastAccess } from '@/models/environment'
 
 type EnvironmentsTableProps = {
   onSortingChange: OnChangeFn<SortingState>
   onPaginationChange: OnChangeFn<PaginationState>
   onColumnFiltersChange: OnChangeFn<ColumnFiltersState>
-  environments: Environment[]
+  environments: Array<EnvironmentWithLastAccess>
   totalCount: number
   sorting: SortingState
   pagination: PaginationState
@@ -68,7 +68,7 @@ export const EnvironmentsTable: ComponentType<EnvironmentsTableProps> = ({
 }
 
 interface DataTableToolbarProps {
-  table: Table<Environment>
+  table: Table<EnvironmentWithLastAccess>
 }
 
 function DataTableToolbar({ table }: DataTableToolbarProps) {

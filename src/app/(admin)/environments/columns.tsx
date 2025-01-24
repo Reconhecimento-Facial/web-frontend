@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client'
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, User as UserIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
@@ -14,14 +14,17 @@ import {
 
 import { useRouter } from 'next/navigation'
 
-import { Environment } from '@/models/environment'
+import { EnvironmentWithLastAccess } from '@/models/environment'
 import Link from 'next/link'
 import { useDeleteEnvironment } from '@/hooks/data/use-delete-environment'
 import { useToast } from '@/hooks/use-toast'
 import { useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { Separator } from '@/components/ui/separator'
+import { ptBR } from 'date-fns/locale'
+import { format } from 'date-fns'
 
-export const columns: ColumnDef<Environment>[] = [
+export const columns: ColumnDef<EnvironmentWithLastAccess>[] = [
   {
     accessorKey: 'name',
     header: 'Nome',
@@ -32,8 +35,30 @@ export const columns: ColumnDef<Environment>[] = [
     accessorKey: 'last_access',
     header: 'Último acesso',
     enableSorting: false,
-    cell: () => {
-      return <div></div>
+    cell: ({ row }) => {
+      const {
+        last_access_time: accessTime,
+        last_accessed_by_user_name: userName,
+      } = row.original
+
+      return (
+        <div className="flex gap-4">
+          {!accessTime && (
+            <span className="text-muted-foreground">Sem registro</span>
+          )}
+
+          <div className="flex gap-2">
+            <UserIcon className="mr-2 h-5 w-5" />
+            <span>{userName} </span>
+          </div>
+
+          <Separator className="h-5" orientation="vertical" />
+          <span>
+            {accessTime &&
+              format(accessTime, 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+          </span>
+        </div>
+      )
     },
   },
   {

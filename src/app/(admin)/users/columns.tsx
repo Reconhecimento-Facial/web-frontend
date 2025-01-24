@@ -16,14 +16,14 @@ import {
 import { Badge } from '@/components/ui/badge'
 
 import Link from 'next/link'
-import { User } from '@/models/user'
+import { UserWithLastAccess } from '@/models/user'
 import { useCallback } from 'react'
 
 import { useToast } from '@/hooks/use-toast'
 import { useDeleteUser } from '@/hooks/data/use-delete-user'
 import { useQueryClient } from '@tanstack/react-query'
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<UserWithLastAccess>[] = [
   {
     accessorKey: 'name',
     header: 'Nome',
@@ -52,8 +52,13 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: 'last_access',
     header: 'Último acesso',
     enableSorting: false,
-    cell: () => {
-      return <div></div>
+    cell: ({ row }) => {
+      const { last_accessed_environment_name: envName } = row.original
+
+      if (!envName)
+        return <span className="text-muted-foreground">Sem registro</span>
+
+      return <div>{envName}</div>
     },
   },
   {

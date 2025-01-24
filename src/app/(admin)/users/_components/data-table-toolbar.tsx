@@ -8,10 +8,10 @@ import { Input } from '@/components/ui/input'
 import { statusOptions } from '@/lib/data'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
-import { User } from '@/models/user'
+import { UserWithLastAccess } from '@/models/user'
 
 interface DataTableToolbarProps {
-  table: Table<User>
+  table: Table<UserWithLastAccess>
 }
 
 export function DataTableToolbar({ table }: DataTableToolbarProps) {

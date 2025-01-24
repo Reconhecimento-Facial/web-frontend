@@ -17,6 +17,9 @@ import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 import { fetchUser } from '@/hooks/data/fetch-user'
 import { Metadata } from 'next'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { Separator } from '@/components/ui/separator'
 
 type Props = {
   params: { id: string }
@@ -50,7 +53,11 @@ export default async function UserProfilePage({ params }: Props) {
 
   if (!response.ok) return null
 
-  const user = (await response.json()) as UserType
+  const user = (await response.json()) as UserType & {
+    last_accessed_environment_id: number | undefined
+    last_accessed_environment_name: string | undefined
+    last_access_time: string | undefined
+  }
 
   const userEnvironments = await fetchUserEnvironments(
     user.id,
@@ -105,12 +112,24 @@ export default async function UserProfilePage({ params }: Props) {
               <label className="text-sm font-medium text-gray-500">
                 Último acesso
               </label>
-              <p className="mt-1 flex items-center">
-                {/* <span className="mr-2">
-                  {user.last_access.environment.label}
-                </span>
-                {user.last_access.access_at.toLocaleDateString('pt-BR', {})} */}
-              </p>
+              <div className="mt-1 flex items-center gap-4">
+                {!user.last_access_time && (
+                  <span className="text-muted-foreground">Sem registro</span>
+                )}
+
+                {user.last_access_time && (
+                  <>
+                    <span>{user.last_accessed_environment_name}</span>
+                    <Separator className="h-5" orientation="vertical" />
+
+                    <span>
+                      {format(user.last_access_time, 'dd/MM/yyyy HH:mm', {
+                        locale: ptBR,
+                      })}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
             <div>
