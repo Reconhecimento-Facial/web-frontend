@@ -5,7 +5,6 @@ import { auth } from '@/auth'
 
 import { fetchEnvironment } from '@/hooks/data/fetch-environment'
 import { Metadata } from 'next'
-import { DEFAULT_ENVIRONMENT_IMAGE_URL } from '../../_components/utils'
 
 type Props = {
   params: {
@@ -54,15 +53,17 @@ export default async function EditPage({ params }: Props) {
 
   const environment = (await response.json()) as Environment
 
-  const photo = environment.photo_url || DEFAULT_ENVIRONMENT_IMAGE_URL
-
   return (
     <div className="p-6">
       <h2 className="mb-4 scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
         Editar Ambiente
       </h2>
       <EnvironmentForm
-        environment={{ name: environment.name, photo, id: environment.id }}
+        environment={{
+          name: environment.name,
+          photo: environment.photo_url,
+          id: environment.id,
+        }}
         footerSlot={<FooterEditForm environmentId={Number(environmentId)} />}
       />
     </div>

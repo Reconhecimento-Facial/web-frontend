@@ -40,7 +40,7 @@ import { format, startOfDay, subYears } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
-import Image from 'next/image'
+
 import { useEditUser } from '@/hooks/data/use-edit-user'
 import {
   Select,
@@ -50,6 +50,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getDirtyValues } from '@/lib/form'
+import { ThemedImage } from '@/components/themed-image'
+import { DARK_IMAGE_PLACEHOLDER, LIGHT_IMAGE_PLACEHOLDER } from '@/lib/image'
 
 export type UserInputs = z.infer<typeof userFormSchema>
 
@@ -83,7 +85,7 @@ export function UserForm({ className, user, footerSlot }: UserFormProps) {
   })
 
   const [imagePreview, setImagePreview] = useState(
-    user?.photo || DEFAULT_USER_IMAGE_URL,
+    user?.photo as string | undefined,
   )
 
   const { data } = useInfiniteEnvironments()
@@ -165,13 +167,15 @@ export function UserForm({ className, user, footerSlot }: UserFormProps) {
                 <FormLabel htmlFor="photo" required>
                   Foto para reconhecimento
                 </FormLabel>
-                <Image
-                  className="mt-4"
-                  width={345}
-                  height={170}
-                  src={imagePreview}
-                  alt="Imagem do ambiente"
-                />
+                <div className="mt-4 h-[170px] w-[345px]">
+                  <ThemedImage
+                    width={345}
+                    height={170}
+                    srcLight={imagePreview || LIGHT_IMAGE_PLACEHOLDER}
+                    srcDark={imagePreview || DARK_IMAGE_PLACEHOLDER}
+                    alt="Imagem do ambiente"
+                  />
+                </div>
                 <FormLabel
                   htmlFor="photo"
                   className="cursor-pointer text-sm font-medium underline underline-offset-4 hover:text-primary"

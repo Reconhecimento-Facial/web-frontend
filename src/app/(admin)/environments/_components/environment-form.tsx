@@ -18,16 +18,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { cn } from '@/lib/utils'
 import React, { useMemo, useState } from 'react'
-import { DEFAULT_ENVIRONMENT_IMAGE_URL, environmentFormSchema } from './utils'
+import { environmentFormSchema } from './utils'
 import { z } from 'zod'
 
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import { useCreateEnvironment } from '@/hooks/data/use-create-environment'
-import Image from 'next/image'
 
 import { useEditEnvironment } from '@/hooks/data/use-edit-environment'
 import { getDirtyValues } from '@/lib/form'
+import { ThemedImage } from '@/components/themed-image'
+import { DARK_IMAGE_PLACEHOLDER, LIGHT_IMAGE_PLACEHOLDER } from '@/lib/image'
 
 export type EnvironmentInputs = z.infer<typeof environmentFormSchema>
 
@@ -57,7 +58,7 @@ export function EnvironmentForm({
   })
 
   const [imagePreview, setImagePreview] = useState(
-    environment?.photo || DEFAULT_ENVIRONMENT_IMAGE_URL,
+    environment?.photo as string | undefined,
   )
 
   const {
@@ -81,7 +82,7 @@ export function EnvironmentForm({
           description: 'Ambiente criado com sucesso!',
         })
         form.reset()
-        setImagePreview(DEFAULT_ENVIRONMENT_IMAGE_URL)
+        setImagePreview('')
       } else {
         const dirtyValues = getDirtyValues(form.formState.dirtyFields, values)
 
@@ -117,13 +118,16 @@ export function EnvironmentForm({
           render={({ field }) => {
             return (
               <FormItem>
-                <Image
-                  className="mt-4"
-                  width={345}
-                  height={170}
-                  src={imagePreview}
-                  alt="Imagem do ambiente"
-                />
+                <div className="mt-4 h-[170px] w-full">
+                  <ThemedImage
+                    width={345}
+                    height={170}
+                    srcLight={imagePreview || LIGHT_IMAGE_PLACEHOLDER}
+                    srcDark={imagePreview || DARK_IMAGE_PLACEHOLDER}
+                    alt="Imagem do ambiente"
+                  />
+                </div>
+
                 <FormLabel
                   htmlFor="photo"
                   className="cursor-pointer text-sm font-medium underline underline-offset-4 hover:text-primary"

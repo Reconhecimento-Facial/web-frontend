@@ -1,6 +1,6 @@
 import dayjs from '@/lib/dayjs'
 import { Metadata } from 'next'
-import Image from 'next/image'
+
 import { EnvironmentPanels } from './_components/environment-panels'
 import { buttonVariants } from '@/components/ui/button'
 import { auth } from '@/auth'
@@ -8,7 +8,8 @@ import { Environment } from '@/models/environment'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { fetchEnvironment } from '@/hooks/data/fetch-environment'
-import { DEFAULT_ENVIRONMENT_IMAGE_URL } from '../_components/utils'
+import { ThemedImage } from '@/components/themed-image'
+import { DARK_IMAGE_PLACEHOLDER, LIGHT_IMAGE_PLACEHOLDER } from '@/lib/image'
 
 type Props = {
   params: {
@@ -54,21 +55,23 @@ export default async function EnvironmentPage({ params }: Props) {
 
   if (!environment) return <div>Ambiente não encontrado</div>
 
-  const image = environment.photo_url || DEFAULT_ENVIRONMENT_IMAGE_URL
-
   return (
     <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-2">
       <div className="">
         <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
           {environment.name}
         </h2>
-        <Image
-          className="mt-4"
-          width={345}
-          height={170}
-          src={image}
-          alt="Imagem do ambiente"
-        />
+
+        <div className="mt-4 h-[170px] w-[345px]">
+          <ThemedImage
+            width={345}
+            height={170}
+            srcLight={environment.photo_url || LIGHT_IMAGE_PLACEHOLDER}
+            srcDark={environment.photo_url || DARK_IMAGE_PLACEHOLDER}
+            alt="Imagem do ambiente"
+          />
+        </div>
+
         <div className="mt-4 space-y-4">
           <GridItem label="Dispositivo" value={'teste'} />
 
