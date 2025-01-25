@@ -40,7 +40,6 @@ export function AppUserMenu() {
           Minha conta
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Perfil</DropdownMenuItem>
 
         <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
           Sair
